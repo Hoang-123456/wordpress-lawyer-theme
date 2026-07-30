@@ -1,0 +1,599 @@
+/*
+Theme Name:  Kanzlei Theme
+Description: Custom FSE theme for a solo law firm
+Version:     1.0.0
+Author:      Rechtsanwalt
+Requires at least: 6.6
+Tested up to: 7.0
+Requires PHP: 8.0
+*/
+
+/*
+  Minimal CSS – most styling runs through theme.json.
+  Only things theme.json cannot handle live here.
+*/
+
+/* ── Global ────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 3px solid var(--wp--preset--color--primary);
+  outline-offset: 3px;
+}
+
+/* Primary hat auf dunklem Grund (Header/Hero/Footer/About) zu wenig
+   Eigenkontrast zum Hintergrund – dort Accent als Fokusfarbe verwenden */
+.site-header :focus-visible,
+.site-footer :focus-visible,
+.has-primary-background-color :focus-visible {
+  outline-color: var(--wp--preset--color--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Offset so the sticky header doesn't cover the section heading */
+[id] {
+  scroll-margin-top: 80px;
+}
+
+/* ── Skip Link ─────────────────────────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--wp--preset--color--primary);
+  color: var(--wp--preset--color--white);
+  font-weight: 600;
+  text-decoration: none;
+  z-index: 9999;
+  border-radius: 0 0 6px 6px;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--wp--preset--color--primary);
+  border-bottom: 3px solid var(--wp--preset--color--accent);
+}
+
+.site-header .wp-block-site-title a {
+  color: var(--wp--preset--color--white) !important;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.site-header .wp-block-navigation a {
+  color: var(--wp--preset--color--white) !important;
+  text-decoration: none;
+  font-size: var(--wp--preset--font-size--sm);
+  font-family: var(--wp--preset--font-family--inter);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.site-header .wp-block-navigation a:hover {
+  color: var(--wp--preset--color--accent) !important;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+
+.site-footer {
+  background: var(--wp--preset--color--text);
+  border-top: 3px solid var(--wp--preset--color--accent);
+}
+
+.site-footer a {
+  color: rgba(255,255,255,0.6) !important;
+  font-size: var(--wp--preset--font-size--sm);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--wp--preset--color--accent) !important;
+}
+
+/* ── Sections ──────────────────────────────────────────────── */
+
+.section-light {
+  background-color: var(--wp--preset--color--surface);
+}
+
+/* ── Service Cards ─────────────────────────────────────────── */
+
+.service-card {
+  border-top: 3px solid var(--wp--preset--color--accent);
+  background: var(--wp--preset--color--white);
+  padding: 2rem !important;
+  box-shadow: var(--wp--preset--shadow--subtle);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.service-card:hover {
+  box-shadow: var(--wp--preset--shadow--medium);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .service-card {
+    padding: 1.5rem !important;
+  }
+}
+
+/* ── Service Icons ─────────────────────────────────────────── */
+
+.service-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.service-icon--green { background: var(--wp--preset--color--service-green); color: var(--wp--preset--color--white); }
+.service-icon--amber { background: var(--wp--preset--color--service-amber); color: var(--wp--preset--color--white); }
+.service-icon--teal  { background: var(--wp--preset--color--service-teal);  color: var(--wp--preset--color--white); }
+.service-icon--gray  { background: var(--wp--preset--color--service-gray); color: var(--wp--preset--color--white); }
+
+/* ── Service Tags ──────────────────────────────────────────── */
+
+.service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.service-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 99px;
+}
+
+.service-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.service-tag--green { background: color-mix(in srgb, var(--wp--preset--color--service-green) 15%, white); color: var(--wp--preset--color--service-green); }
+.service-tag--green::before { background: var(--wp--preset--color--service-green); }
+
+.service-tag--amber { background: color-mix(in srgb, var(--wp--preset--color--service-amber) 15%, white); color: var(--wp--preset--color--service-amber); }
+.service-tag--amber::before { background: var(--wp--preset--color--service-amber); }
+
+.service-tag--teal { background: color-mix(in srgb, var(--wp--preset--color--service-teal) 15%, white); color: var(--wp--preset--color--primary); }
+.service-tag--teal::before { background: var(--wp--preset--color--service-teal); }
+
+.service-tag--gray { background: color-mix(in srgb, var(--wp--preset--color--service-gray) 12%, white); color: var(--wp--preset--color--service-gray); }
+.service-tag--gray::before { background: var(--wp--preset--color--service-gray); }
+
+/* ── About Section ─────────────────────────────────────────── */
+
+.about-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.about-blur {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: var(--wp--preset--color--accent);
+  opacity: 0.08;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-blur--top    { top: -100px; left: -100px; }
+.about-blur--bottom { bottom: -100px; right: -100px; }
+
+.about-section .wp-block-columns {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Contact Info Cards ────────────────────────────────────── */
+
+.contact-info-link {
+  display: block;
+  text-decoration: none;
+  margin-bottom: 1rem;
+}
+
+.contact-info-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--wp--preset--color--white);
+  border-radius: 8px;
+  padding: 1.25rem !important;
+  box-shadow: var(--wp--preset--shadow--subtle);
+  border: 1.5px solid transparent;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.contact-info-link:hover .contact-info-card {
+  box-shadow: var(--wp--preset--shadow--medium);
+  transform: translateY(-2px);
+  border-color: var(--wp--preset--color--accent);
+}
+
+.contact-info-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--wp--preset--color--primary);
+  color: var(--wp--preset--color--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.contact-info-link:hover .contact-info-icon {
+  transform: scale(1.1);
+}
+
+.contact-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.contact-info-label {
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 600;
+  color: var(--wp--preset--color--text);
+}
+
+.contact-info-value {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+  transition: color 0.2s;
+}
+
+.contact-info-link:hover .contact-info-value {
+  color: var(--wp--preset--color--primary);
+}
+
+/* ── Office Hours Card ─────────────────────────────────────── */
+
+.office-hours-card {
+  background: var(--wp--preset--color--primary);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.office-hours-title {
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 600;
+  color: var(--wp--preset--color--accent);
+  font-family: var(--wp--preset--font-family--inter);
+  margin-bottom: 1rem;
+}
+
+.office-hours-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--wp--preset--font-size--sm);
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 0.5rem;
+}
+
+.office-hours-row span:last-child {
+  font-weight: 500;
+  color: var(--wp--preset--color--white);
+}
+
+/* ── Legal Pages (Privacy / Imprint) ───────────────────────── */
+
+.legal-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.legal-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 500;
+  color: var(--wp--preset--color--primary);
+  text-decoration: none;
+  margin-bottom: 2rem;
+  transition: color 0.2s;
+}
+
+.legal-back-link:hover {
+  color: var(--wp--preset--color--text);
+}
+
+.legal-meta {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+  margin-top: -0.5rem;
+  margin-bottom: 3rem;
+}
+
+.legal-page section + section {
+  margin-top: 3.5rem;
+}
+
+.legal-page h2 {
+  font-size: var(--wp--preset--font-size--lg);
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--playfair);
+  color: var(--wp--preset--color--text);
+  padding-top: 2rem;
+  border-top: 1px solid var(--wp--preset--color--border);
+  margin-bottom: 0.875rem;
+}
+
+.legal-page h3 {
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 600;
+  font-family: var(--wp--preset--font-family--inter);
+  color: var(--wp--preset--color--text);
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.legal-page p {
+  color: var(--wp--preset--color--muted);
+  line-height: 1.75;
+  max-width: 720px;
+  margin-bottom: 1rem;
+}
+
+.legal-page a {
+  color: var(--wp--preset--color--primary);
+  text-decoration: underline;
+}
+
+.legal-page a:hover {
+  color: var(--wp--preset--color--text);
+}
+
+.legal-page strong {
+  color: var(--wp--preset--color--text);
+  font-weight: 600;
+}
+
+.legal-list {
+  list-style: none;
+  padding: 0 0 0 1rem;
+  border-left: 2px solid var(--wp--preset--color--border);
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.legal-list li {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+  line-height: 1.65;
+}
+
+.legal-table {
+  width: 100%;
+  max-width: 720px;
+  border-collapse: collapse;
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+  border: 1px solid var(--wp--preset--color--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.legal-table thead {
+  background: var(--wp--preset--color--surface);
+}
+
+.legal-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--text);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--wp--preset--color--border);
+}
+
+.legal-table td {
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+  vertical-align: top;
+  border-bottom: 1px solid var(--wp--preset--color--border);
+}
+
+.legal-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.legal-table tbody tr:hover {
+  background: var(--wp--preset--color--surface);
+}
+
+/* ── Contact Form (Custom-Code-Ansatz) ─────────────────────── */
+
+.kanzlei-form__status {
+  display: none;
+  margin-bottom: 1.25rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 6px;
+  font-size: var(--wp--preset--font-size--sm);
+  line-height: 1.5;
+}
+
+.kanzlei-form__status.is-success,
+.kanzlei-form__status.is-error {
+  display: block;
+}
+
+.kanzlei-form__status.is-success {
+  background: color-mix(in srgb, var(--wp--preset--color--service-green) 12%, white);
+  color: var(--wp--preset--color--service-green);
+  border-left: 3px solid var(--wp--preset--color--service-green);
+}
+
+.kanzlei-form__status.is-error {
+  background: color-mix(in srgb, var(--wp--preset--color--error) 10%, white);
+  color: var(--wp--preset--color--error);
+  border-left: 3px solid var(--wp--preset--color--error);
+}
+
+.kanzlei-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+}
+
+.kanzlei-field > label {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  color: var(--wp--preset--color--text);
+}
+
+.kanzlei-req {
+  color: var(--wp--preset--color--error);
+}
+
+.kanzlei-field input[type="text"],
+.kanzlei-field input[type="email"],
+.kanzlei-field select,
+.kanzlei-field textarea {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  font: inherit;
+  color: var(--wp--preset--color--text);
+  background: var(--wp--preset--color--white);
+  border: 1.5px solid var(--wp--preset--color--border);
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+
+.kanzlei-field input:focus,
+.kanzlei-field select:focus,
+.kanzlei-field textarea:focus {
+  border-color: var(--wp--preset--color--primary);
+}
+
+.kanzlei-field textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.kanzlei-field input[type="file"] {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+}
+
+.kanzlei-hint {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--muted);
+}
+
+/* Einwilligung: Checkbox neben Text statt darüber */
+.kanzlei-field--consent {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.kanzlei-field--consent input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.kanzlei-field--consent label {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 400;
+  color: var(--wp--preset--color--muted);
+}
+
+/* Honeypot: für Menschen unsichtbar, für Bots ein Köder */
+.kanzlei-form__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Submit-Button an die theme.json-Button-Optik angeglichen (eigenes <button>) */
+.kanzlei-form__submit {
+  font-family: var(--wp--preset--font-family--inter);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--primary);
+  background: var(--wp--preset--color--accent);
+  border: none;
+  border-radius: 3px;
+  padding: 0.875rem 2rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.kanzlei-form__submit:hover {
+  background: var(--wp--preset--color--primary);
+  color: var(--wp--preset--color--white);
+}
+
+.kanzlei-form__submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Contact Cards Row (FluentBooking-Ansatz) ──────────────── */
+
+/* Gleiche Karten wie im Custom-Ansatz, hier aber als Reihe unter dem Kalender */
+.contact-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.contact-cards-row .contact-info-link {
+  margin-bottom: 0;
+}

@@ -1,0 +1,71 @@
+{
+  "name": "Lawyer WordPress Theme",
+  "image": "php:8.2-cli",
+  "runArgs": ["--name", "lawyer-wordpress-theme"],
+
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Named Volume, das NUR den Claude-Code-Auth-/Settings-Ordner übersteht,
+  // während der Rest des Home-Verzeichnisses bei jedem Rebuild verworfen
+  // wird. Dadurch bleibt man eingeloggt, ohne den ganzen Container-State
+  // persistent zu machen. ${devcontainerId} sorgt dafür, dass jedes Projekt
+  // sein eigenes Volume bekommt, statt sich eins mit allen zu teilen.
+  "mounts": [
+    "source=claude-code-config-${devcontainerId},target=/root/.claude,type=volume"
+  ],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Claude-Code-Extension – bringt eine eigene, eingebettete CLI-Kopie
+        // fürs Chat-Panel mit, kein separates CLI-Feature nötig (siehe oben).
+        "anthropic.claude-code",
+
+        // PHP-Sprachserver: Autovervollständigung, Diagnostik, Go-to-Definition –
+        // Grundvoraussetzung, um überhaupt sinnvoll PHP zu schreiben.
+        "bmewburn.vscode-intelephense-client",
+
+        // Coding-Standards-Check (auf WordPress Coding Standards konfigurierbar) –
+        // von Anfang an relevant, weil ihr sicherheitskritischen Formular-Code
+        // selbst schreibt und Konsistenz von Tag 1 an will.
+        "wongjn.php-sniffer",
+
+        // Autovervollständigung für add_action/add_filter, inkl. Core-Hooks –
+        // sofort nötig, sobald ihr in functions.php/inc/*.php Hooks registriert.
+        "johnbillion.vscode-wordpress-hooks",
+
+        // Einheitliche Formatierungsregeln über alle Dateitypen hinweg (Indentation,
+        // Zeilenenden) – kostet nichts, verhindert von Anfang an Diff-Rauschen,
+        // besonders relevant, falls das Theme später als Basis für weitere
+        // Kundenprojekte geforkt wird.
+        "editorconfig.editorconfig",
+
+        // Git-Historie/Blame direkt im Editor – nützlich, sobald der erste
+        // sicherheitsrelevante Code (Formular-Handler) entsteht und Änderungen
+        // nachvollziehbar bleiben sollen.
+        "eamodio.gitlens"
+
+        // Bewusst noch NICHT enthalten, wird später ergänzt, sobald relevant:
+        // - cweijan.vscode-mysql-client2   (sobald die Formular-DB-Tabelle existiert)
+        // - deque-systems.vscode-axe-linter (sobald an den Patterns/HTML gearbeitet wird)
+        // - ms-azuretools.vscode-docker     (sobald Nextcloud-Portal ansteht)
+        // - esbenp.vscode-prettier          (sobald eigenes JS für Formular-Validierung entsteht)
+        // - mikestead.dotenv                (sobald Secrets über .env verwaltet werden)
+        // - humao.rest-client               (sobald der Formular-Endpunkt testbar ist)
+      ],
+
+      "settings": {
+        "php.suggest.basic": false,
+        "editor.formatOnSave": false
+      }
+    }
+  },
+
+  // Optional: lokaler PHP-Dev-Server, falls ihr direkt im Container testen wollt.
+  "forwardPorts": [8080],
+
+  "remoteUser": "root"
+}

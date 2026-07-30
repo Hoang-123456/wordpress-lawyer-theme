@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "kanzlei/contact-form",
+	"version": "1.0.0",
+	"title": "Kontaktformular (Custom-Code)",
+	"category": "theme",
+	"icon": "email-alt",
+	"description": "Sicheres, DSGVO-konformes Kontaktformular des Kanzlei-Themes. Wird serverseitig gerendert, damit der CSRF-Nonce bei jedem Aufruf frisch ist.",
+	"textdomain": "kanzlei-theme",
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"customClassName": false
+	},
+	"viewScript": "kanzlei-contact-form-view",
+	"render": "file:./render.php"
+}
