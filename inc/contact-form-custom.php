@@ -344,14 +344,12 @@ function kanzlei_cf_deactivate() {
 	wp_clear_scheduled_hook( KANZLEI_CF_EXPIRE_CRON );
 }
 
-// Administratoren dürfen die Anfragen immer sehen – unabhängig von der Aktivierung.
-add_filter( 'user_has_cap', 'kanzlei_cf_grant_admin_cap' );
-function kanzlei_cf_grant_admin_cap( $caps ) {
-	if ( ! empty( $caps['manage_options'] ) ) {
-		$caps[ KANZLEI_CF_CAP ] = true;
-	}
-	return $caps;
-}
+// Bewusst KEIN automatisches Durchreichen von manage_options auf KANZLEI_CF_CAP:
+// Mandantendaten (§ 203 StGB) sollen nur sehen, wer explizit die Rolle
+// kanzlei_manager hat – nicht jeder WP-Administrator (z. B. die wartende
+// Agentur/Entwicklerin). Admin-Rechte zur Nutzerverwaltung (Passwort
+// zurücksetzen, Rolle neu zuweisen, 2FA/Login-Sperren aufheben) bleiben davon
+// unberührt, da sie keine eigene Capability-Freigabe brauchen.
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
