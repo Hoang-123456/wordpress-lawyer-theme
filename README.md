@@ -4,29 +4,21 @@ WordPress-Block-Theme (FSE) für eine Solo-Kanzlei. Kein Page-Builder, kein
 jQuery, lokale Fonts, WCAG-AA-orientiert. Die meiste Gestaltung läuft über
 `theme.json`; PHP/CSS nur, wo Blöcke das nicht abdecken.
 
-## Projektkontext (für den Wiedereinstieg in einem neuen Chat)
+## Hintergrund
 
-Kunde ist ein Rechtsanwalt (Berufsgeheimnisträger, § 203 StGB) – das begründet
-die durchgängig sicherheits-/datenschutzorientierten Entscheidungen unten
-(Metadaten-only-Mail, kein externer Kalenderzugriff, private Datei-Ablage etc.).
-Die vollständige Historie, rechtliche Einordnung und ursprüngliche Abwägungen
-stehen in zwei Begleitdokumenten:
-- `projekt-kontaktformular-kanzlei.md` – Hauptdokument, Custom-Code-Ansatz (A)
-- `alternative-echtzeit-buchung-mit-upload.md` – FluentBooking-Ansatz (B)
+Dieses Theme ist für eine Rechtsanwaltskanzlei gebaut. Anwälte sind als
+Berufsgeheimnisträger an § 203 StGB sowie § 43e BRAO gebunden – das geht über
+normale DSGVO-Anforderungen hinaus und begründet die durchgängig
+sicherheits-/datenschutzorientierten Entscheidungen in diesem Theme:
+Metadaten-only-Benachrichtigungsmails, keine mandatsbezogenen Inhalte (Datei,
+Nachrichtentext) über Drittanbieter wie Google Workspace, private Datei-Ablage
+außerhalb des öffentlichen Webroots, Least-Privilege-Zugänge für den
+Anwalt-Login.
 
-**Wichtig beim Lesen dieser beiden Dokumente:** Sie beschreiben den
-ursprünglichen Planungsstand. Der dort in „Terminverhandlung nach der
-Erstanfrage“ beschriebene offene Punkt (Telefon/Antwortrunde/Magic-Link/
-Kalender, 4 Optionen) ist **für Ansatz A inzwischen gelöst** – und zwar nicht
-durch eine der vier ursprünglich diskutierten Optionen, sondern durch das
-unten beschriebene Slot-Auswahl-System mit Bestätigen/Ablehnen. Die
-Begleitdokumente wurden dafür nicht mehr aktualisiert; maßgeblich für den
-aktuellen Stand ist diese README, nicht die beiden `.md`-Dateien.
-
-Aktueller Stand: Beide Ansätze sind vollständig implementiert und getestet
-(siehe unten), aber **es ist noch nicht entschieden, welcher der beiden
-tatsächlich live geht** – siehe „Nicht genutzte Variante entfernen“ weiter
-unten. Bis diese Entscheidung fällt, bleiben bewusst beide im Theme.
+Das Theme bringt **zwei vollständig implementierte, wählbare
+Kontakt-Varianten** mit (siehe unten). Auf einer produktiven Seite wird genau
+eine genutzt, die andere wird gelöscht (siehe „Nicht genutzte Variante
+entfernen“ in den jeweiligen Abschnitten).
 
 ## Kontaktbereich einrichten
 
@@ -131,9 +123,11 @@ nachtragen, sonst kann ein Besucher sie belegen.
    Endpunkte) – sonst reisen Formulardaten und Datei-Uploads beim Absenden
    unverschlüsselt durchs Netz. Reine Hosting-Konfiguration (TLS-Zertifikat,
    z. B. Let's Encrypt), kein Theme-Code.
-8. **AVV mit dem Hoster abschließen** und dessen Serverstandort/Datenschutz-
-   Zusagen gegen die Anforderungen aus `projekt-kontaktformular-kanzlei.md`
-   prüfen (Berufsgeheimnisträger-Kontext, § 203 StGB) – unabhängig davon,
+8. **AVV mit dem Hoster abschließen** – und zusätzlich prüfen, ob dieser eine
+   **strafbewehrte Verschwiegenheitsverpflichtung** anbietet, die über einen
+   normalen DSGVO-AVV (Art. 28 DSGVO) hinausgeht. Ein Standard-AVV reicht bei
+   Berufsgeheimnisträgern (§ 203 StGB) nicht aus, sobald ein Dienstleister mit
+   mandatsbezogenen Inhalten in Berührung kommen könnte – unabhängig davon,
    welcher Hoster am Ende gewählt wird.
 9. **Vor dem Go-Live in einem echten Browser testen** (nicht nur per
    Code-Review): kompletten Buchungs-Flow durchklicken – Slot wählen,
@@ -214,8 +208,8 @@ FluentBooking-Version zu prüfen**. Maßgeblich bleibt die Plugin-Konfiguration.
 File-Field, Textarea und Terms-&-Conditions-Fragen gemeinsam in der
 kostenlosen FluentBooking-Version nutzbar sind, oder ob dafür zusätzlich zur
 ohnehin für Kalender-Sync nötigen Pro-Version eine weitere Einschränkung
-gilt – ließ sich beim letzten Stand nicht abschließend klären (siehe
-`alternative-echtzeit-buchung-mit-upload.md`, Abschnitt „Offene Punkte“).
+gilt – direkt im aktuellen FluentBooking-Backend/Preisvergleich vor
+Projektstart gegenchecken, das ändert sich je nach Plugin-Version.
 
 **Variante B entfernen (falls A genutzt wird)**
 1. `require_once … 'inc/contact-form-booking-hooks.php'`-Zeile in `functions.php` löschen
@@ -225,7 +219,12 @@ gilt – ließ sich beim letzten Stand nicht abschließend klären (siehe
 
 ## Hinweis für Folgeprojekte
 
-Künftige Kunden brauchen erfahrungsgemäß nur **einen** der beiden Ansätze. Modell:
-`kanzlei-theme` als Basis-Theme mit beiden Modulen führen, pro Kunde klonen und
-den nicht genutzten Ansatz wie oben löschen. Details/offene Punkte dazu siehe
-`projekt-kontaktformular-kanzlei.md`.
+Künftige Kunden brauchen erfahrungsgemäß nur **einen** der beiden Ansätze.
+Empfohlenes Modell: `kanzlei-theme` als Basis-Theme mit beiden Modulen führen,
+pro Neukunde klonen und den nicht genutzten Ansatz wie oben beschrieben löschen
+(Datei + Pattern + `require`-Zeile), statt pro Kunde ein eigenes Theme von
+Grund auf neu zu bauen. Wie Verbesserungen am Basis-Theme später an bereits
+ausgelieferte Kunden-Repos weitergegeben werden (z. B. Git-Branches pro Kunde
+mit manuellem Cherry-Picking vs. ein geteiltes Core-Package als
+Composer-Dependency), ist bewusst noch offen – relevant wird das erst, sobald
+tatsächlich ein zweiter Kunde dazukommt.
