@@ -1,4 +1,4 @@
-# Kanzlei Theme
+# Lawyer Landingpage Theme
 
 WordPress-Block-Theme (FSE) für eine Solo-Kanzlei. Kein Page-Builder, kein
 jQuery, lokale Fonts, WCAG-AA-orientiert. Die meiste Gestaltung läuft über
