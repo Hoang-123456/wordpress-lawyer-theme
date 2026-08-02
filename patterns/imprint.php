@@ -9,9 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Categories: kanzlei
  * Inserter:   false
  *
- * Hinweis: Die H1 kommt jetzt ausschließlich vom WordPress-Seitentitel
- * (post-title in templates/page.html). Beim Anlegen der Seite im Backend
- * als Titel "Impressum" eintragen, sonst weicht die H1 vom Seiteninhalt ab.
+ * Note: the H1 now comes exclusively from the WordPress page title
+ * (post-title in templates/page.html). When creating the page in the
+ * backend, enter "Impressum" as the title, otherwise the H1 will not
+ * match the page content.
  */
 ?>
 

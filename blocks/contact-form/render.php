@@ -1,12 +1,12 @@
 <?php
 /**
- * Server-Render des Blocks "kanzlei/contact-form".
+ * Server render of the "kanzlei/contact-form" block.
  *
- * Läuft bei JEDEM Seitenaufruf (render_callback), damit der CSRF-Nonce
- * frisch ist. Ausgeloggte wie eingeloggte Besucher sehen dasselbe Formular.
+ * Runs on EVERY page load (render_callback) so the CSRF nonce stays fresh.
+ * Logged-out and logged-in visitors see the same form.
  *
- * Die komplette Verarbeitung (Validierung, Datei, DB, Mail) liegt in
- * inc/contact-form-custom.php. Diese Datei erzeugt nur das Markup.
+ * The complete processing (validation, file, DB, mail) lives in
+ * inc/contact-form-custom.php. This file only produces the markup.
  *
  * @var array    $attributes
  * @var string   $content
@@ -17,11 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Erfolg/Fehler kommt nach dem Absenden per Redirect (?kanzlei_contact=…) zurück.
+// Success/error comes back after submission via redirect (?kanzlei_contact=…).
 $kanzlei_state = isset( $_GET['kanzlei_contact'] ) ? sanitize_key( wp_unslash( $_GET['kanzlei_contact'] ) ) : '';
 
-// Nachrichten einmal definieren – dienen sowohl der No-JS-Anzeige (unten) als
-// auch dem JS-Enhancement (data-Attribute), damit die Texte nicht doppelt gepflegt werden.
+// Define messages once – used both for the no-JS display (below) and the
+// JS enhancement (data attributes), so the texts aren't maintained twice.
 $kanzlei_msg_success = __( 'Vielen Dank! Ihr Wunschtermin wurde vorläufig reserviert – ich bestätige ihn innerhalb von 24 Stunden.', 'kanzlei-theme' );
 $kanzlei_msg_error   = __( 'Ihre Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es erneut.', 'kanzlei-theme' );
 
@@ -38,11 +38,11 @@ if ( 'success' === $kanzlei_state ) {
 $kanzlei_max_mb    = (int) apply_filters( 'kanzlei_cf_max_upload_mb', 4 );
 $kanzlei_max_files = (int) apply_filters( 'kanzlei_cf_max_files', 3 );
 
-// Freie Slots werden bei jedem Aufruf frisch berechnet – bereits vergebene
-// oder gesperrte Zeiten tauchen dadurch gar nicht erst in der Auswahl auf.
+// Free slots are recalculated on every request – already taken or blocked
+// times therefore never even appear in the selection.
 $kanzlei_slots = kanzlei_cf_available_slots();
 ?>
-<div <?php echo get_block_wrapper_attributes( array( 'class' => 'kanzlei-form-wrap' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- Core liefert bereits escapte Attribute. ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => 'kanzlei-form-wrap' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- core already returns escaped attributes. ?>>
 
 	<div class="kanzlei-form__status<?php echo $kanzlei_status_type ? ' is-' . esc_attr( $kanzlei_status_type ) : ''; ?>"
 		role="status" aria-live="polite" tabindex="-1"
@@ -57,7 +57,7 @@ $kanzlei_slots = kanzlei_cf_available_slots();
 		<input type="hidden" name="action" value="kanzlei_contact_submit">
 		<?php wp_nonce_field( 'kanzlei_contact_submit', '_kanzlei_nonce' ); ?>
 
-		<?php // Honeypot: für Menschen unsichtbar (CSS), Bots füllen es aus → serverseitig verworfen. ?>
+		<?php // Honeypot: invisible to humans (CSS), bots fill it in → discarded server-side. ?>
 		<div class="kanzlei-form__hp" aria-hidden="true">
 			<label for="kanzlei-website"><?php esc_html_e( 'Ihre Website (bitte frei lassen)', 'kanzlei-theme' ); ?></label>
 			<input type="text" id="kanzlei-website" name="kanzlei_website" tabindex="-1" autocomplete="off">
@@ -104,7 +104,7 @@ $kanzlei_slots = kanzlei_cf_available_slots();
 			<span id="kanzlei-file-hint" class="kanzlei-hint">
 				<?php
 				printf(
-					/* translators: 1: maximale Anzahl Dateien, 2: maximale Größe pro Datei in Megabyte. */
+					/* translators: 1: maximum number of files, 2: maximum size per file in megabytes. */
 					esc_html__( 'PDF, JPG oder PNG. Max. %1$d Dateien, je max. %2$d MB.', 'kanzlei-theme' ),
 					(int) $kanzlei_max_files,
 					(int) $kanzlei_max_mb
@@ -118,7 +118,7 @@ $kanzlei_slots = kanzlei_cf_available_slots();
 			<label for="kanzlei-consent">
 				<?php
 				printf(
-					/* translators: %s: Link zur Datenschutzerklärung. */
+					/* translators: %s: link to the privacy policy. */
 					wp_kses(
 						__( 'Ich habe die <a href="%s">Datenschutzerklärung</a> gelesen und willige in die Verarbeitung meiner Daten zur Bearbeitung meiner Anfrage ein.', 'kanzlei-theme' ),
 						array( 'a' => array( 'href' => array() ) )

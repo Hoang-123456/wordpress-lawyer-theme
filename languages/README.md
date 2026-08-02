@@ -1,5 +1,5 @@
-# Übersetzungen
+# Translations
 
-Für zusätzliche Sprachen `.po`/`.mo`-Dateien hier ablegen, z. B.
-`kanzlei-theme-en_US.po`. `load_theme_textdomain()` ist in
-`functions.php` bereits vorbereitet.
+Place additional-language `.po`/`.mo` files here, e.g.
+`kanzlei-theme-en_US.po`. `load_theme_textdomain()` is already set up in
+`functions.php`.

@@ -4,19 +4,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Title:      Contact – FluentBooking-Kalender
+ * Title:      Contact – FluentBooking Calendar
  * Slug:       kanzlei/contact-booking
  * Categories: kanzlei
  *
- * Ansatz 2 (FluentBooking): echte Kalender-Buchung mit Nachricht & Datei in
- * einem Schritt. Details/Trade-offs siehe alternative-echtzeit-buchung-mit-upload.md.
+ * Approach 2 (FluentBooking): real calendar booking with message & file
+ * upload in one step. See alternative-echtzeit-buchung-mit-upload.md for
+ * details/trade-offs.
  *
- * Bewusst breiteres Layout als beim Custom-Formular: Der Kalender braucht
- * horizontale Breite, deshalb steht er hier über die volle Spalte und die
- * Kontaktkarten liegen als Reihe darunter (nicht daneben).
+ * Deliberately wider layout than the custom form: the calendar needs
+ * horizontal width, so it spans the full column here and the contact cards
+ * sit in a row below it (not beside it).
  *
- * Gegenstück: patterns/contact-form.php (Custom-Code). Eine Variante wählen,
- * die andere löschen – siehe README.
+ * Counterpart: patterns/contact-form.php (custom code). Choose one variant,
+ * delete the other – see README.
  */
 ?>
 
@@ -41,12 +42,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="wp-block-group booking-embed">
 
 		<!--
-			FLUENTBOOKING HIER EINFÜGEN, nachdem das Plugin installiert und ein
-			Kalender angelegt wurde:
-			Block (+) → „FluentBooking“ auswählen und den passenden Kalender wählen,
-			oder alternativ den Shortcode-Block mit [fluent_booking id="…"] einsetzen.
-			Konfiguration (Manual Confirmation, Booking Questions, Metadaten-only-Mail)
-			siehe README, Abschnitt „Variante B“.
+			INSERT FLUENTBOOKING HERE once the plugin is installed and a
+			calendar has been created:
+			Block (+) → select "FluentBooking" and choose the matching calendar,
+			or alternatively use the shortcode block with [fluent_booking id="…"].
+			For configuration (Manual Confirmation, Booking Questions, metadata-only
+			email) see README, section "Variant B".
 		-->
 
 	</div>

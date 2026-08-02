@@ -1,16 +1,16 @@
 /**
- * Progressive Enhancement für das Kanzlei-Kontaktformular.
+ * Progressive enhancement for the law firm's contact form.
  *
- * Ohne JavaScript funktioniert das Formular vollständig (klassischer POST +
- * Redirect). Mit JavaScript wird ohne Seiten-Reload abgesendet und die Rück-
- * meldung in die aria-live-Region geschrieben – dadurch wird sie von Screen-
- * readern angesagt und der Fokus dorthin gesetzt.
+ * Without JavaScript the form works fully (classic POST + redirect). With
+ * JavaScript it submits without a page reload and writes the feedback into
+ * the aria-live region – which makes screen readers announce it and moves
+ * focus there.
  */
 ( function () {
 	'use strict';
 
 	if ( ! ( 'fetch' in window && 'FormData' in window ) ) {
-		return; // Ältere Browser nutzen den No-JS-Fallback.
+		return; // Older browsers use the no-JS fallback.
 	}
 
 	document.querySelectorAll( '.kanzlei-form' ).forEach( function ( form ) {
@@ -43,7 +43,7 @@
 					}
 				} )
 				.catch( function () {
-					// Netzwerkfehler → auf den robusten klassischen Submit zurückfallen.
+					// Network error → fall back to the robust classic submit.
 					form.submit();
 				} )
 				.finally( function () {

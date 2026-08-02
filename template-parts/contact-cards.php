@@ -4,11 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gemeinsame Kontakt-Info-Karten (Telefon, E-Mail, Adresse, Bürozeiten).
+ * Shared contact info cards (phone, email, address, office hours).
  *
- * Von beiden Kontakt-Patterns eingebunden – contact-form.php (Custom-Code)
- * und contact-booking.php (FluentBooking) – damit das Karten-Markup nur an
- * einer Stelle gepflegt wird. Enthält nur statisches Markup, keine Logik.
+ * Included by both contact patterns – contact-form.php (custom code)
+ * and contact-booking.php (FluentBooking) – so the card markup is
+ * maintained in only one place. Contains only static markup, no logic.
  */
 ?>
 <!-- wp:html -->

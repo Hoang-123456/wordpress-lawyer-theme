@@ -1,28 +1,28 @@
 <?php
 /**
- * Custom-Code-Terminbuchung – komplette Server-Logik in einer Datei.
+ * Custom-code appointment booking – complete server logic in one file.
  *
- * Bewusst gekapselt: Um diesen Ansatz vollständig zu entfernen, genügt es,
- * diese Datei zu löschen, die require-Zeile in functions.php zu streichen und
- * die zugehörigen Frontend-Teile (blocks/contact-form/, patterns/contact-form.php)
- * zu entfernen. Es bleiben keine verstreuten Hooks zurück.
+ * Deliberately encapsulated: to fully remove this approach, it's enough to
+ * delete this file, remove the require line in functions.php, and remove
+ * the associated frontend parts (blocks/contact-form/, patterns/contact-form.php).
+ * No scattered hooks are left behind.
  *
- * Ablauf: Besucher wählt einen freien Slot (kein Freitext-Terminwunsch) →
- * Anfrage landet als "vorläufig" (pending) im Backend → Anwalt bestätigt oder
- * lehnt ab. Bei Ablehnung meldet sich der Anwalt selbst mit einer Alternative
- * (Telefon/E-Mail) – kein automatischer Verhandlungs-Mechanismus.
+ * Flow: visitor picks an open slot (no free-text appointment request) →
+ * request lands as "pending" in the backend → lawyer confirms or rejects.
+ * On rejection, the lawyer reaches out themselves with an alternative
+ * (phone/email) – no automatic negotiation mechanism.
  *
- * Kein Zugriff auf externe Kalender (z. B. Google Workspace): Verfügbarkeit
- * wird ausschließlich aus der eigenen Datenbank berechnet (bestätigte +
- * vorläufige Anfragen + manuell gesperrte Zeiten). Das verhindert, dass
- * mandatsbezogene Kalendereinträge (z. B. Termin-Titel mit Mandantennamen)
- * über einen Drittanbieter laufen.
+ * No access to external calendars (e.g. Google Workspace): availability is
+ * calculated exclusively from the theme's own database (confirmed +
+ * pending requests + manually blocked times). This prevents client-related
+ * calendar entries (e.g. appointment titles with client names) from passing
+ * through a third-party provider.
  *
- * Sicherheits-/DSGVO-Architektur (siehe projekt-kontaktformular-kanzlei.md):
- * - Sensible Inhalte (Nachricht, Datei) verlassen den Server nie.
- * - E-Mail an die Kanzlei enthält nur Metadaten (Name, Termin), kein
- *   Nachrichtentext, keine Datei – wegen § 203 StGB / anwaltlicher Schweigepflicht.
- * - Volle Einsicht nur über das login-geschützte Backend-Dashboard.
+ * Security/DSGVO (GDPR) architecture (see projekt-kontaktformular-kanzlei.md):
+ * - Sensitive content (message, file) never leaves the server.
+ * - The email to the law firm contains only metadata (name, appointment),
+ *   no message text, no file – due to § 203 StGB / attorney confidentiality.
+ * - Full visibility only via the login-protected backend dashboard.
  *
  * @package kanzlei-theme
  */
@@ -33,37 +33,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Konstanten & kleine Helfer
+ *  Constants & small helpers
  * ─────────────────────────────────────────────────────────────────────────
  */
 
-/** Fähigkeit, die Kontaktanfragen einsehen darf (Least-Privilege eigene Rolle). */
+/** Capability allowed to view contact requests (least-privilege dedicated role). */
 const KANZLEI_CF_CAP = 'manage_kanzlei_submissions';
 
-/** Cron-Hook für die tägliche Aufräum-Aufgabe (Löschkonzept, IP-Anonymisierung). */
+/** Cron hook for the daily cleanup task (deletion policy, IP anonymization). */
 const KANZLEI_CF_CRON = 'kanzlei_cf_cleanup';
 
-/** Cron-Hook für die stündliche Prüfung auf abgelaufene, unbestätigte Anfragen. */
+/** Cron hook for the hourly check for expired, unconfirmed requests. */
 const KANZLEI_CF_EXPIRE_CRON = 'kanzlei_cf_expire_pending';
 
-/** Name der Anfragen-Tabelle (ohne Präfix). */
+/** Name of the requests table (without prefix). */
 function kanzlei_cf_table() {
 	return $GLOBALS['wpdb']->prefix . 'kanzlei_contact';
 }
 
-/** Name der Tabelle für manuell gesperrte Zeiten (ohne Präfix). */
+/** Name of the table for manually blocked times (without prefix). */
 function kanzlei_cf_blocked_table() {
 	return $GLOBALS['wpdb']->prefix . 'kanzlei_blocked_slots';
 }
 
-/** Name der Tabelle für Datei-Uploads pro Anfrage (ohne Präfix). */
+/** Name of the table for file uploads per request (without prefix). */
 function kanzlei_cf_files_table() {
 	return $GLOBALS['wpdb']->prefix . 'kanzlei_contact_files';
 }
 
 /**
- * Erlaubte Datei-Uploads: Endung => echter MIME-Typ (per finfo geprüft).
- * Bewusst kurze Whitelist statt Blacklist.
+ * Allowed file uploads: extension => real MIME type (verified via finfo).
+ * Deliberately a short whitelist instead of a blacklist.
  */
 function kanzlei_cf_allowed_types() {
 	return apply_filters(
@@ -77,32 +77,32 @@ function kanzlei_cf_allowed_types() {
 	);
 }
 
-/** Maximale Größe pro Datei in Bytes (Default 4 MB, mit render.php synchron). */
+/** Maximum size per file in bytes (default 4 MB, kept in sync with render.php). */
 function kanzlei_cf_max_upload_bytes() {
 	return (int) apply_filters( 'kanzlei_cf_max_upload_mb', 4 ) * MB_IN_BYTES;
 }
 
-/** Maximale Anzahl Dateien pro Anfrage (Default 3). */
+/** Maximum number of files per request (default 3). */
 function kanzlei_cf_max_files() {
 	return (int) apply_filters( 'kanzlei_cf_max_files', 3 );
 }
 
-/** Maximale Gesamtgröße aller Dateien einer Anfrage in Bytes (Default 12 MB = 3 × 4 MB). */
+/** Maximum combined size of all files in a request, in bytes (default 12 MB = 3 × 4 MB). */
 function kanzlei_cf_max_total_upload_bytes() {
 	return (int) apply_filters( 'kanzlei_cf_max_total_upload_mb', 12 ) * MB_IN_BYTES;
 }
 
-/** Privates Upload-Verzeichnis (außerhalb der öffentlich verlinkten Pfade). */
+/** Private upload directory (outside the publicly linked paths). */
 function kanzlei_cf_private_dir() {
 	$uploads = wp_upload_dir();
 	return trailingslashit( $uploads['basedir'] ) . 'kanzlei-private';
 }
 
 /**
- * Stellt sicher, dass das private Verzeichnis existiert und gegen Direktzugriff
- * geschützt ist. Die .htaccess greift nur bei Apache; die eigentliche Sicherheit
- * liefern zufällige Dateinamen + der ausschließlich authentifizierte Download.
- * Bei nginx zusätzlich eine location-Sperre setzen (siehe README).
+ * Ensures the private directory exists and is protected against direct access.
+ * The .htaccess only takes effect on Apache; the actual security comes from
+ * random filenames + the exclusively authenticated download. On nginx, also
+ * set a location block (see README).
  */
 function kanzlei_cf_ensure_private_dir() {
 	$dir = kanzlei_cf_private_dir();
@@ -117,7 +117,7 @@ function kanzlei_cf_ensure_private_dir() {
 	}
 }
 
-/** Client-IP – bewusst nur REMOTE_ADDR (X-Forwarded-For ist fälschbar). */
+/** Client IP – deliberately only REMOTE_ADDR (X-Forwarded-For can be spoofed). */
 function kanzlei_cf_client_ip() {
 	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? wp_unslash( $_SERVER['REMOTE_ADDR'] ) : '';
 	$ip = filter_var( $ip, FILTER_VALIDATE_IP );
@@ -126,47 +126,48 @@ function kanzlei_cf_client_ip() {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Verfügbarkeit & Slot-Berechnung
- *  Alles bewusst nur aus der eigenen DB – kein externer Kalenderzugriff.
+ *  Availability & slot calculation
+ *  Everything deliberately from the theme's own DB only – no external
+ *  calendar access.
  * ─────────────────────────────────────────────────────────────────────────
  */
 
 /**
- * Sprechzeiten-Regeln: ISO-Wochentag (1=Montag … 7=Sonntag) => [Start, Ende].
- * Platzhalter-Werte, bis der Anwalt die tatsächlichen Zeiten/die Gesprächs-
- * dauer festlegt – dann einfach hier bzw. per Filter anpassen.
+ * Office hours rules: ISO weekday (1=Monday … 7=Sunday) => [start, end].
+ * Placeholder values until the lawyer sets the actual hours/consultation
+ * duration – then simply adjust here or via filter.
  */
 function kanzlei_cf_availability_rules() {
 	return apply_filters(
 		'kanzlei_cf_availability_rules',
 		array(
-			1 => array( '09:00', '18:00' ), // Montag
-			2 => array( '09:00', '18:00' ), // Dienstag
-			3 => array( '09:00', '18:00' ), // Mittwoch
-			4 => array( '09:00', '18:00' ), // Donnerstag
-			5 => array( '09:00', '18:00' ), // Freitag
+			1 => array( '09:00', '18:00' ), // Monday
+			2 => array( '09:00', '18:00' ), // Tuesday
+			3 => array( '09:00', '18:00' ), // Wednesday
+			4 => array( '09:00', '18:00' ), // Thursday
+			5 => array( '09:00', '18:00' ), // Friday
 		)
 	);
 }
 
-/** Slot-Dauer in Minuten (Platzhalter, siehe kanzlei_cf_availability_rules()). */
+/** Slot duration in minutes (placeholder, see kanzlei_cf_availability_rules()). */
 function kanzlei_cf_slot_duration_minutes() {
 	return (int) apply_filters( 'kanzlei_cf_slot_duration_minutes', 30 );
 }
 
-/** Wie viele Tage im Voraus buchbar sind (ab morgen, nicht am selben Tag). */
+/** How many days in advance can be booked (starting tomorrow, not same-day). */
 function kanzlei_cf_booking_window_days() {
 	return (int) apply_filters( 'kanzlei_cf_booking_window_days', 30 );
 }
 
-/** Nach wie vielen Stunden eine unbestätigte Anfrage automatisch verfällt. */
+/** After how many hours an unconfirmed request expires automatically. */
 function kanzlei_cf_pending_expiry_hours() {
 	return (int) apply_filters( 'kanzlei_cf_pending_expiry_hours', 48 );
 }
 
 /**
- * Formatiert einen gespeicherten Slot ('Y-m-d H:i:s') für die Anzeige,
- * z. B. "Montag, 21. Juli 2026, 09:00 Uhr".
+ * Formats a stored slot ('Y-m-d H:i:s') for display,
+ * e.g. "Monday, 21 July 2026, 09:00".
  */
 function kanzlei_cf_format_slot( $slot ) {
 	$dt = date_create( $slot, wp_timezone() );
@@ -177,8 +178,8 @@ function kanzlei_cf_format_slot( $slot ) {
 }
 
 /**
- * Bereits vergebene Zeiten im angegebenen Zeitraum: bestätigte Termine,
- * noch nicht abgelaufene vorläufige Anfragen, manuell gesperrte Zeiten.
+ * Already taken times within the given range: confirmed appointments,
+ * not-yet-expired pending requests, manually blocked times.
  */
 function kanzlei_cf_taken_slots( $from, $to ) {
 	global $wpdb;
@@ -215,7 +216,7 @@ function kanzlei_cf_taken_slots( $from, $to ) {
 }
 
 /**
- * Alle aktuell freien Slots im Buchungsfenster, gruppiert nach Datum:
+ * All currently free slots within the booking window, grouped by date:
  * [ 'Y-m-d' => [ 'H:i' => 'Y-m-d H:i:s', … ], … ]
  */
 function kanzlei_cf_available_slots() {
@@ -254,7 +255,7 @@ function kanzlei_cf_available_slots() {
 	return $slots;
 }
 
-/** Prüft, ob ein bestimmter Slot-Wert aktuell tatsächlich noch frei ist. */
+/** Checks whether a given slot value is actually still free right now. */
 function kanzlei_cf_is_slot_available( $value ) {
 	foreach ( kanzlei_cf_available_slots() as $times ) {
 		if ( in_array( $value, $times, true ) ) {
@@ -266,7 +267,7 @@ function kanzlei_cf_is_slot_available( $value ) {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Aktivierung / Deaktivierung des Themes
+ *  Theme activation / deactivation
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -315,7 +316,7 @@ function kanzlei_cf_activate() {
 
 	kanzlei_cf_ensure_private_dir();
 
-	// Eigene, eingeschränkte Rolle für den Anwalt-Zugang (Least Privilege).
+	// Dedicated, restricted role for the lawyer's access (least privilege).
 	add_role(
 		'kanzlei_manager',
 		__( 'Kanzlei-Verwaltung', 'kanzlei-theme' ),
@@ -325,42 +326,42 @@ function kanzlei_cf_activate() {
 		)
 	);
 
-	// Tägliche Aufräum-Aufgabe (Löschkonzept, IP-Anonymisierung) planen.
+	// Schedule the daily cleanup task (deletion policy, IP anonymization).
 	if ( ! wp_next_scheduled( KANZLEI_CF_CRON ) ) {
 		wp_schedule_event( time(), 'daily', KANZLEI_CF_CRON );
 	}
-	// Stündliche Prüfung auf abgelaufene, unbestätigte Anfragen – bewusst
-	// engmaschiger als der Tages-Cron, damit ein blockierter Slot nicht bis
-	// zu drei Tage lang unnötig reserviert bleibt.
+	// Hourly check for expired, unconfirmed requests – deliberately tighter
+	// than the daily cron, so a blocked slot doesn't stay unnecessarily
+	// reserved for up to three days.
 	if ( ! wp_next_scheduled( KANZLEI_CF_EXPIRE_CRON ) ) {
 		wp_schedule_event( time(), 'hourly', KANZLEI_CF_EXPIRE_CRON );
 	}
 }
 
-// Beim Themewechsel Cron abbestellen (Daten & Tabellen bleiben unangetastet).
+// Unschedule cron on theme switch (data & tables remain untouched).
 add_action( 'switch_theme', 'kanzlei_cf_deactivate' );
 function kanzlei_cf_deactivate() {
 	wp_clear_scheduled_hook( KANZLEI_CF_CRON );
 	wp_clear_scheduled_hook( KANZLEI_CF_EXPIRE_CRON );
 }
 
-// Bewusst KEIN automatisches Durchreichen von manage_options auf KANZLEI_CF_CAP:
-// Mandantendaten (§ 203 StGB) sollen nur sehen, wer explizit die Rolle
-// kanzlei_manager hat – nicht jeder WP-Administrator (z. B. die wartende
-// Agentur/Entwicklerin). Admin-Rechte zur Nutzerverwaltung (Passwort
-// zurücksetzen, Rolle neu zuweisen, 2FA/Login-Sperren aufheben) bleiben davon
-// unberührt, da sie keine eigene Capability-Freigabe brauchen.
+// Deliberately NO automatic pass-through of manage_options to KANZLEI_CF_CAP:
+// client data (§ 203 StGB) should only be visible to whoever explicitly has
+// the kanzlei_manager role – not every WP administrator (e.g. a maintaining
+// agency/developer). Admin rights for user management (resetting passwords,
+// reassigning roles, lifting 2FA/login locks) are unaffected by this, since
+// they don't require a dedicated capability grant.
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Block & Frontend-Skript registrieren
+ *  Register block & frontend script
  * ─────────────────────────────────────────────────────────────────────────
  */
 
 add_action( 'init', 'kanzlei_cf_register_block' );
 function kanzlei_cf_register_block() {
-	// View-Skript (Progressive Enhancement) – wird via block.json "viewScript"
-	// nur geladen, wenn der Block auf der Seite tatsächlich vorkommt.
+	// View script (progressive enhancement) – loaded via block.json "viewScript"
+	// only when the block actually appears on the page.
 	wp_register_script(
 		'kanzlei-contact-form-view',
 		get_theme_file_uri( 'assets/js/contact-form.js' ),
@@ -374,7 +375,7 @@ function kanzlei_cf_register_block() {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Formular-Verarbeitung (admin-post: ein- wie ausgeloggt)
+ *  Form processing (admin-post: logged-in as well as logged-out)
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -384,27 +385,27 @@ add_action( 'admin_post_nopriv_kanzlei_contact_submit', 'kanzlei_cf_handle_submi
 function kanzlei_cf_handle_submit() {
 	$is_ajax = ! empty( $_POST['_ajax'] );
 
-	// 1) CSRF-Nonce.
+	// 1) CSRF nonce.
 	if ( ! isset( $_POST['_kanzlei_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_kanzlei_nonce'] ), 'kanzlei_contact_submit' ) ) {
 		kanzlei_cf_respond( false, __( 'Sicherheitsprüfung fehlgeschlagen. Bitte laden Sie die Seite neu.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// 2) Honeypot: gefülltes Feld = Bot → nach außen „Erfolg“, nichts speichern.
+	// 2) Honeypot: filled field = bot → reports "success" outwardly, saves nothing.
 	if ( ! empty( $_POST['kanzlei_website'] ) ) {
 		kanzlei_cf_respond( true, kanzlei_cf_success_text(), $is_ajax );
 	}
 
-	// 3) Einfaches Rate-Limiting pro IP (Spam-Fluten begrenzen).
+	// 3) Simple rate limiting per IP (contain spam floods).
 	if ( ! kanzlei_cf_rate_ok() ) {
 		kanzlei_cf_respond( false, __( 'Zu viele Anfragen in kurzer Zeit. Bitte versuchen Sie es später erneut.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// 4) Pflicht-Einwilligung (serverseitig, nicht nur required-Attribut).
+	// 4) Required consent (server-side, not just the required attribute).
 	if ( empty( $_POST['kanzlei_consent'] ) || '1' !== (string) wp_unslash( $_POST['kanzlei_consent'] ) ) {
 		kanzlei_cf_respond( false, __( 'Bitte stimmen Sie der Datenschutzerklärung zu.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// 5) Felder validieren & säubern.
+	// 5) Validate & sanitize fields.
 	$name    = isset( $_POST['kanzlei_name'] ) ? sanitize_text_field( wp_unslash( $_POST['kanzlei_name'] ) ) : '';
 	$email   = isset( $_POST['kanzlei_email'] ) ? sanitize_email( wp_unslash( $_POST['kanzlei_email'] ) ) : '';
 	$slot    = isset( $_POST['kanzlei_slot'] ) ? sanitize_text_field( wp_unslash( $_POST['kanzlei_slot'] ) ) : '';
@@ -414,21 +415,21 @@ function kanzlei_cf_handle_submit() {
 		kanzlei_cf_respond( false, __( 'Bitte füllen Sie alle Pflichtfelder korrekt aus.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// 5b) Der gewählte Slot wird serverseitig NEU geprüft, nicht blind aus dem
-	// Formular übernommen – verhindert Buchung bereits vergebener/erfundener
-	// Zeiten (z. B. wenn zwei Besucher gleichzeitig denselben Slot wählen).
+	// 5b) The chosen slot is RE-verified server-side, not blindly trusted from
+	// the form – prevents booking already-taken/made-up times (e.g. when two
+	// visitors pick the same slot at the same time).
 	if ( '' === $slot || ! kanzlei_cf_is_slot_available( $slot ) ) {
 		kanzlei_cf_respond( false, __( 'Der gewählte Termin ist leider nicht mehr verfügbar. Bitte wählen Sie einen anderen.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// 6) Dateien prüfen & sicher ablegen (optional, mehrere möglich).
+	// 6) Check files & store them securely (optional, multiple allowed).
 	$files_input = isset( $_FILES['kanzlei_file'] ) ? kanzlei_cf_normalize_files( $_FILES['kanzlei_file'] ) : array();
 
 	if ( count( $files_input ) > kanzlei_cf_max_files() ) {
 		kanzlei_cf_respond(
 			false,
 			sprintf(
-				/* translators: %d: maximale Anzahl Dateien. */
+				/* translators: %d: maximum number of files. */
 				__( 'Sie können maximal %d Dateien anhängen.', 'kanzlei-theme' ),
 				kanzlei_cf_max_files()
 			),
@@ -444,12 +445,12 @@ function kanzlei_cf_handle_submit() {
 		kanzlei_cf_respond( false, __( 'Die Dateien sind in Summe zu groß.', 'kanzlei-theme' ), $is_ajax );
 	}
 
-	// [ ['stored' => uuid.ext, 'original' => ursprünglicher Dateiname], … ]
+	// [ ['stored' => uuid.ext, 'original' => original filename], … ]
 	$uploaded_files = array();
 	foreach ( $files_input as $f ) {
 		$upload = kanzlei_cf_store_upload( $f );
 		if ( is_wp_error( $upload ) ) {
-			// Bereits gespeicherte Dateien dieser Anfrage wieder entfernen (keine Waisen).
+			// Remove files already stored for this request again (no orphans).
 			foreach ( $uploaded_files as $done ) {
 				@unlink( trailingslashit( kanzlei_cf_private_dir() ) . $done['stored'] );
 			}
@@ -461,7 +462,7 @@ function kanzlei_cf_handle_submit() {
 		);
 	}
 
-	// 7) Persistieren – Status "pending", bis der Anwalt bestätigt/ablehnt.
+	// 7) Persist – status "pending" until the lawyer confirms/rejects.
 	global $wpdb;
 	$now      = current_time( 'mysql' );
 	$inserted = $wpdb->insert(
@@ -480,7 +481,7 @@ function kanzlei_cf_handle_submit() {
 	);
 
 	if ( ! $inserted ) {
-		// Bereits gespeicherte Dateien wieder entfernen, damit keine Waisen zurückbleiben.
+		// Remove already-stored files again so no orphans remain.
 		foreach ( $uploaded_files as $done ) {
 			@unlink( trailingslashit( kanzlei_cf_private_dir() ) . $done['stored'] );
 		}
@@ -506,14 +507,14 @@ function kanzlei_cf_handle_submit() {
 	kanzlei_cf_respond( true, kanzlei_cf_success_text(), $is_ajax );
 }
 
-/** Standard-Erfolgstext (mit render.php synchron gehalten). */
+/** Default success text (kept in sync with render.php). */
 function kanzlei_cf_success_text() {
 	return __( 'Vielen Dank! Ihr Wunschtermin wurde vorläufig reserviert – ich bestätige ihn innerhalb von 24 Stunden.', 'kanzlei-theme' );
 }
 
 /**
- * Antwort ans Frontend: JSON beim JS-Enhancement, sonst Redirect (PRG-Muster).
- * Beendet die Ausführung.
+ * Response to the frontend: JSON for the JS enhancement, otherwise redirect
+ * (PRG pattern). Terminates execution.
  */
 function kanzlei_cf_respond( $success, $message, $is_ajax ) {
 	if ( $is_ajax ) {
@@ -528,11 +529,11 @@ function kanzlei_cf_respond( $success, $message, $is_ajax ) {
 	exit;
 }
 
-/** Rate-Limit: max. N Anfragen pro IP im Zeitfenster (Default 5/Stunde). */
+/** Rate limit: max. N requests per IP within the time window (default 5/hour). */
 function kanzlei_cf_rate_ok() {
 	$ip = kanzlei_cf_client_ip();
 	if ( '' === $ip ) {
-		return true; // Ohne IP nicht blockieren (z. B. CLI/Tests).
+		return true; // Don't block without an IP (e.g. CLI/tests).
 	}
 	$limit  = (int) apply_filters( 'kanzlei_cf_rate_limit', 5 );
 	$window = (int) apply_filters( 'kanzlei_cf_rate_window', HOUR_IN_SECONDS );
@@ -546,10 +547,9 @@ function kanzlei_cf_rate_ok() {
 }
 
 /**
- * Formt PHPs verschachtelte $_FILES-Struktur bei Mehrfach-Upload
- * (name="kanzlei_file[]") in eine Liste einzelner Datei-Arrays um, wie sie
- * kanzlei_cf_store_upload() erwartet. Leere Slots (nichts ausgewählt) werden
- * übersprungen.
+ * Reshapes PHP's nested $_FILES structure for multi-file uploads
+ * (name="kanzlei_file[]") into a list of individual file arrays, as expected
+ * by kanzlei_cf_store_upload(). Empty slots (nothing selected) are skipped.
  */
 function kanzlei_cf_normalize_files( $files ) {
 	$normalized = array();
@@ -572,8 +572,8 @@ function kanzlei_cf_normalize_files( $files ) {
 }
 
 /**
- * Prüft und speichert einen Upload sicher im privaten Verzeichnis.
- * Rückgabe: der (zufällige) Dateiname als String oder WP_Error.
+ * Validates and stores an upload securely in the private directory.
+ * Returns: the (random) filename as a string, or WP_Error.
  */
 function kanzlei_cf_store_upload( array $file ) {
 	if ( ! empty( $file['error'] ) ) {
@@ -588,13 +588,13 @@ function kanzlei_cf_store_upload( array $file ) {
 
 	$allowed = kanzlei_cf_allowed_types();
 
-	// Endung aus dem Dateinamen …
+	// Extension from the filename …
 	$ext = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
 	if ( ! isset( $allowed[ $ext ] ) ) {
 		return new WP_Error( 'upload', __( 'Nur PDF-, JPG- oder PNG-Dateien sind erlaubt.', 'kanzlei-theme' ) );
 	}
 
-	// … und echter MIME-Typ per finfo müssen zur Whitelist passen.
+	// … and the real MIME type via finfo must match the whitelist.
 	$finfo = new finfo( FILEINFO_MIME_TYPE );
 	$mime  = $finfo->file( $file['tmp_name'] );
 	if ( $mime !== $allowed[ $ext ] ) {
@@ -603,7 +603,7 @@ function kanzlei_cf_store_upload( array $file ) {
 
 	kanzlei_cf_ensure_private_dir();
 
-	// Zufälliger Name verhindert Erraten/Kollisionen; nur Endung übernehmen.
+	// A random name prevents guessing/collisions; only keep the extension.
 	$safe_name = wp_generate_uuid4() . '.' . $ext;
 	$target    = trailingslashit( kanzlei_cf_private_dir() ) . $safe_name;
 
@@ -616,9 +616,9 @@ function kanzlei_cf_store_upload( array $file ) {
 }
 
 /**
- * Metadaten-only-Benachrichtigung an die Kanzlei.
- * KEIN Nachrichtentext, KEINE Datei – nur Name + Termin. Reply-To =
- * Besucher, damit direkt geantwortet werden kann.
+ * Metadata-only notification to the law firm.
+ * NO message text, NO file – only name + appointment. Reply-To =
+ * visitor, so a reply can be sent directly.
  */
 function kanzlei_cf_notify( $name, $email, $slot ) {
 	$to      = apply_filters( 'kanzlei_cf_notify_email', get_option( 'admin_email' ) );
@@ -639,7 +639,7 @@ function kanzlei_cf_notify( $name, $email, $slot ) {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Backend: Dashboard, Einstellungen, sichere Aktionen
+ *  Backend: dashboard, settings, secure actions
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -663,7 +663,7 @@ function kanzlei_cf_render_admin_page() {
 	global $wpdb;
 	$table = kanzlei_cf_table();
 
-	// Aufbewahrungsfrist speichern.
+	// Save the retention period.
 	if ( isset( $_POST['kanzlei_cf_retention'] ) && check_admin_referer( 'kanzlei_cf_settings' ) ) {
 		$days = max( 1, min( 3650, (int) $_POST['kanzlei_cf_retention'] ) );
 		update_option( 'kanzlei_cf_retention_days', $days );
@@ -671,11 +671,11 @@ function kanzlei_cf_render_admin_page() {
 	}
 	$retention = (int) get_option( 'kanzlei_cf_retention_days', 30 );
 
-	// Filter: nach Name/E-Mail suchen, um Anfragen derselben Person zu bündeln
-	// (Anfragen bleiben dabei unverändert getrennte Datensätze, siehe Doku).
+	// Filter: search by name/email to group requests from the same person
+	// (requests remain unchanged, separate records regardless – see docs).
 	$search = isset( $_GET['kanzlei_search'] ) ? sanitize_text_field( wp_unslash( $_GET['kanzlei_search'] ) ) : '';
 
-	// Einfache Paginierung.
+	// Simple pagination.
 	$per_page = 20;
 	$paged    = isset( $_GET['paged'] ) ? max( 1, (int) $_GET['paged'] ) : 1;
 	$offset   = ( $paged - 1 ) * $per_page;
@@ -696,8 +696,8 @@ function kanzlei_cf_render_admin_page() {
 		$wpdb->prepare( "SELECT * FROM {$table} {$where} ORDER BY created_at DESC LIMIT %d OFFSET %d", array_merge( $params, array( $per_page, $offset ) ) ) // phpcs:ignore WordPress.DB
 	);
 
-	// Dateien aller angezeigten Anfragen in einer einzigen Abfrage bündeln
-	// (statt einer Einzelabfrage pro Zeile) und nach Anfrage gruppieren.
+	// Bundle files for all displayed requests into a single query
+	// (instead of one query per row) and group by request.
 	$files_by_contact = array();
 	if ( ! empty( $rows ) ) {
 		$ids          = wp_list_pluck( $rows, 'id' );
@@ -858,7 +858,7 @@ function kanzlei_cf_render_admin_page() {
 			</tbody>
 		</table>
 			<?php
-			// Paginierungs-Links.
+			// Pagination links.
 			$pages = (int) ceil( $total / $per_page );
 			if ( $pages > 1 ) {
 				echo '<p class="tablenav-pages" style="margin-top:1rem;">';
@@ -880,7 +880,7 @@ function kanzlei_cf_render_admin_page() {
 	<?php
 }
 
-/** Nonce-geschützte Aktions-URL für Download/Bestätigen/Ablehnen/Löschen/Aufheben. */
+/** Nonce-protected action URL for download/confirm/reject/delete/unblock. */
 function kanzlei_cf_action_url( $action, $id ) {
 	return wp_nonce_url(
 		admin_url( 'admin-post.php?action=' . $action . '&id=' . (int) $id ),
@@ -888,8 +888,8 @@ function kanzlei_cf_action_url( $action, $id ) {
 	);
 }
 
-// Einzel-Datei-Download – nur authentifiziert, streamt aus dem privaten Verzeichnis.
-// $_GET['id'] bezieht sich hier auf kanzlei_contact_files.id, nicht die Anfrage.
+// Single-file download – authenticated only, streams from the private directory.
+// $_GET['id'] here refers to kanzlei_contact_files.id, not the request.
 add_action( 'admin_post_kanzlei_cf_download', 'kanzlei_cf_download' );
 function kanzlei_cf_download() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -904,7 +904,7 @@ function kanzlei_cf_download() {
 		wp_die( esc_html__( 'Datei nicht gefunden.', 'kanzlei-theme' ) );
 	}
 
-	// basename() verhindert jeglichen Pfad-Traversal aus dem DB-Wert.
+	// basename() prevents any path traversal from the DB value.
 	$path = trailingslashit( kanzlei_cf_private_dir() ) . basename( $file->file_name );
 	if ( ! is_file( $path ) ) {
 		wp_die( esc_html__( 'Datei nicht gefunden.', 'kanzlei-theme' ) );
@@ -913,18 +913,18 @@ function kanzlei_cf_download() {
 	$type = wp_check_filetype( $path );
 	nocache_headers();
 	header( 'Content-Type: ' . ( $type['type'] ? $type['type'] : 'application/octet-stream' ) );
-	// Der Download trägt den ursprünglichen Dateinamen, der Speicherpfad bleibt der Zufallsname.
+	// The download carries the original filename; the storage path stays the random name.
 	header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $file->original_filename ) . '"' );
 	header( 'Content-Length: ' . filesize( $path ) );
-	// Verhindert, dass der Browser die Datei anhand ihres Inhalts statt des
-	// deklarierten Content-Type interpretiert (MIME-Sniffing-Härtung).
+	// Prevents the browser from interpreting the file based on its content
+	// instead of the declared Content-Type (MIME-sniffing hardening).
 	header( 'X-Content-Type-Options: nosniff' );
 	readfile( $path );
 	exit;
 }
 
-// Alle Dateien einer Anfrage gebündelt als ZIP herunterladen. $_GET['id'] ist
-// hier die Anfrage-ID (kanzlei_contact.id), nicht die Datei-ID.
+// Download all files of a request bundled as a ZIP. $_GET['id'] here is the
+// request ID (kanzlei_contact.id), not the file ID.
 add_action( 'admin_post_kanzlei_cf_download_all', 'kanzlei_cf_download_all' );
 function kanzlei_cf_download_all() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -933,9 +933,8 @@ function kanzlei_cf_download_all() {
 	}
 	check_admin_referer( 'kanzlei_cf_download_all_' . $id );
 
-	// Defensiv: ohne ZipArchive-Erweiterung lieber sauber abbrechen statt
-	// einen kryptischen Fatal Error zu riskieren. Einzel-Downloads bleiben
-	// davon unberührt.
+	// Defensive: without the ZipArchive extension, fail cleanly rather than
+	// risk a cryptic fatal error. Single-file downloads remain unaffected.
 	if ( ! class_exists( 'ZipArchive' ) ) {
 		wp_die( esc_html__( 'ZIP-Download ist auf diesem Server nicht verfügbar. Bitte Dateien einzeln herunterladen.', 'kanzlei-theme' ) );
 	}
@@ -954,7 +953,7 @@ function kanzlei_cf_download_all() {
 		wp_die( esc_html__( 'ZIP-Datei konnte nicht erstellt werden.', 'kanzlei-theme' ) );
 	}
 
-	// Namenskollisionen im ZIP vermeiden, falls zwei Dateien gleich heißen.
+	// Avoid name collisions in the ZIP if two files share the same name.
 	$used_names = array();
 	foreach ( $files as $file ) {
 		$path = $private_dir . basename( $file->file_name );
@@ -984,7 +983,7 @@ function kanzlei_cf_download_all() {
 	exit;
 }
 
-// Termin bestätigen – Slot ist damit für andere Besucher verbindlich blockiert.
+// Confirm the appointment – slot is then bindingly blocked for other visitors.
 add_action( 'admin_post_kanzlei_cf_confirm', 'kanzlei_cf_confirm' );
 function kanzlei_cf_confirm() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -1000,7 +999,7 @@ function kanzlei_cf_confirm() {
 	exit;
 }
 
-// Termin ablehnen – Stufe 1: Anwalt meldet sich selbst mit einer Alternative.
+// Reject the appointment – step 1: the lawyer reaches out with an alternative.
 add_action( 'admin_post_kanzlei_cf_reject', 'kanzlei_cf_reject' );
 function kanzlei_cf_reject() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -1016,7 +1015,7 @@ function kanzlei_cf_reject() {
 	exit;
 }
 
-// Anfrage inkl. Datei löschen.
+// Delete the request including its file.
 add_action( 'admin_post_kanzlei_cf_delete', 'kanzlei_cf_delete' );
 function kanzlei_cf_delete() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -1031,7 +1030,7 @@ function kanzlei_cf_delete() {
 	exit;
 }
 
-/** Löscht einen Datensatz samt aller zugehörigen Dateien (zentral, von UI & Cron genutzt). */
+/** Deletes a record along with all associated files (central, used by UI & cron). */
 function kanzlei_cf_delete_row( $id ) {
 	global $wpdb;
 	$table       = kanzlei_cf_table();
@@ -1049,7 +1048,7 @@ function kanzlei_cf_delete_row( $id ) {
 	$wpdb->delete( $table, array( 'id' => (int) $id ), array( '%d' ) );
 }
 
-// Manuelle Sperre eines Slots (Gerichtstermin, privat, Urlaub …) hinzufügen.
+// Add a manual block for a slot (court date, personal, vacation …).
 add_action( 'admin_post_kanzlei_cf_block', 'kanzlei_cf_block' );
 function kanzlei_cf_block() {
 	if ( ! current_user_can( KANZLEI_CF_CAP ) ) {
@@ -1060,7 +1059,7 @@ function kanzlei_cf_block() {
 	$datetime = isset( $_POST['kanzlei_block_datetime'] ) ? sanitize_text_field( wp_unslash( $_POST['kanzlei_block_datetime'] ) ) : '';
 	$reason   = isset( $_POST['kanzlei_block_reason'] ) ? sanitize_text_field( wp_unslash( $_POST['kanzlei_block_reason'] ) ) : '';
 
-	// Erwartetes Format aus <input type="datetime-local">: YYYY-MM-DDTHH:MM.
+	// Expected format from <input type="datetime-local">: YYYY-MM-DDTHH:MM.
 	$normalized = str_replace( 'T', ' ', $datetime );
 	if ( preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $normalized ) ) {
 		global $wpdb;
@@ -1079,7 +1078,7 @@ function kanzlei_cf_block() {
 	exit;
 }
 
-// Manuelle Sperre wieder aufheben.
+// Lift a manual block again.
 add_action( 'admin_post_kanzlei_cf_unblock', 'kanzlei_cf_unblock' );
 function kanzlei_cf_unblock() {
 	$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
@@ -1097,7 +1096,7 @@ function kanzlei_cf_unblock() {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  Cron: Löschkonzept, IP-Anonymisierung, Ablauf unbestätigter Anfragen
+ *  Cron: deletion policy, IP anonymization, expiry of unconfirmed requests
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -1106,17 +1105,17 @@ function kanzlei_cf_run_cleanup() {
 	global $wpdb;
 	$table = kanzlei_cf_table();
 
-	// created_at wird in lokaler Zeit gespeichert (current_time('mysql')),
-	// deshalb die Grenzwerte ebenfalls in lokaler Zeit berechnen.
+	// created_at is stored in local time (current_time('mysql')), so the
+	// cutoff values are calculated in local time as well.
 	$now_local = current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp
 
-	// 1) IP nach 7 Tagen anonymisieren – unabhängig vom Status.
+	// 1) Anonymize IP after 7 days – regardless of status.
 	$ip_cutoff = gmdate( 'Y-m-d H:i:s', $now_local - 7 * DAY_IN_SECONDS );
 	$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET ip_address = NULL WHERE ip_address IS NOT NULL AND created_at < %s", $ip_cutoff ) ); // phpcs:ignore WordPress.DB
 
-	// 2) Abgelehnte Anfragen nach Ablauf der Frist löschen (inkl. Datei).
-	// Bestätigte Termine bleiben unangetastet – die übernimmt der Anwalt
-	// manuell in die Akte und löscht sie danach selbst über das Dashboard.
+	// 2) Delete rejected requests once the retention period has elapsed (incl. file).
+	// Confirmed appointments remain untouched – the lawyer takes them over into
+	// the case file manually and deletes them themselves via the dashboard afterward.
 	$retention = (int) get_option( 'kanzlei_cf_retention_days', 30 );
 	$cutoff    = gmdate( 'Y-m-d H:i:s', $now_local - $retention * DAY_IN_SECONDS );
 	$ids       = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = 'rejected' AND created_at < %s", $cutoff ) ); // phpcs:ignore WordPress.DB
@@ -1125,9 +1124,9 @@ function kanzlei_cf_run_cleanup() {
 	}
 }
 
-// Stündlich: unbestätigte Anfragen nach Ablauf der Frist automatisch verfallen
-// lassen, damit ein unbeantworteter oder böswilliger Antrag nicht dauerhaft
-// einen Termin blockiert.
+// Hourly: automatically let unconfirmed requests expire once the deadline has
+// passed, so that an unanswered or malicious request doesn't permanently
+// block an appointment.
 add_action( KANZLEI_CF_EXPIRE_CRON, 'kanzlei_cf_expire_pending' );
 function kanzlei_cf_expire_pending() {
 	global $wpdb;
@@ -1142,8 +1141,8 @@ function kanzlei_cf_expire_pending() {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
- *  DSGVO: Anbindung an die eingebauten WordPress-Privacy-Werkzeuge
- *  (Werkzeuge → Persönliche Daten exportieren / löschen)
+ *  DSGVO (GDPR): integration with WordPress's built-in privacy tools
+ *  (Tools → Export / Erase Personal Data)
  * ─────────────────────────────────────────────────────────────────────────
  */
 
@@ -1157,9 +1156,9 @@ function kanzlei_cf_register_exporter( $exporters ) {
 }
 
 /**
- * Liefert alle Kontaktanfragen zu einer E-Mail-Adresse für den Export.
- * Bei den üblichen Fallzahlen einer Solo-Kanzlei reicht eine Seite –
- * daher wird $page ignoriert und immer 'done' => true zurückgegeben.
+ * Returns all contact requests for an email address for the export.
+ * With the typical case volumes of a solo law firm, one page is enough –
+ * so $page is ignored and 'done' => true is always returned.
  */
 function kanzlei_cf_export_data( $email_address, $page = 1 ) {
 	global $wpdb;
@@ -1181,8 +1180,8 @@ function kanzlei_cf_export_data( $email_address, $page = 1 ) {
 		);
 		$row_files = $wpdb->get_col( $wpdb->prepare( 'SELECT original_filename FROM ' . kanzlei_cf_files_table() . ' WHERE contact_id = %d', $row->id ) );
 		if ( ! empty( $row_files ) ) {
-			// Der Export bettet keine Binärdateien ein; die Originale bleiben
-			// ausschließlich im geschützten Backend abrufbar.
+			// The export doesn't embed binary files; the originals remain
+			// retrievable exclusively via the protected backend.
 			$data_points[] = array(
 				'name'  => __( 'Angehängte Dateien', 'kanzlei-theme' ),
 				'value' => implode( ', ', $row_files ) . ' – ' . __( 'Original im Backend unter „Kontaktanfragen“ einsehbar.', 'kanzlei-theme' ),
@@ -1213,8 +1212,8 @@ function kanzlei_cf_register_eraser( $erasers ) {
 }
 
 /**
- * Löscht alle Kontaktanfragen zu einer E-Mail-Adresse (Zeile + Datei) über
- * dieselbe zentrale Lösch-Funktion, die auch Backend-UI und Cron nutzen.
+ * Deletes all contact requests for an email address (row + file) via the
+ * same central delete function used by the backend UI and cron.
  */
 function kanzlei_cf_erase_data( $email_address, $page = 1 ) {
 	global $wpdb;

@@ -3,10 +3,10 @@
 	"apiVersion": 3,
 	"name": "kanzlei/contact-form",
 	"version": "1.0.0",
-	"title": "Kontaktformular (Custom-Code)",
+	"title": "Contact Form (Custom Code)",
 	"category": "theme",
 	"icon": "email-alt",
-	"description": "Sicheres, DSGVO-konformes Kontaktformular des Kanzlei-Themes. Wird serverseitig gerendert, damit der CSRF-Nonce bei jedem Aufruf frisch ist.",
+	"description": "Secure, DSGVO (GDPR)-compliant contact form for the Kanzlei theme. Server-rendered so the CSRF nonce is fresh on every request.",
 	"textdomain": "kanzlei-theme",
 	"supports": {
 		"html": false,

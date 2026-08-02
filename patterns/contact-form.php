@@ -4,16 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Title:      Contact – Custom-Formular
+ * Title:      Contact – Custom Form
  * Slug:       kanzlei/contact-form
  * Categories: kanzlei
  *
- * Ansatz 1 (Custom-Code): schlankes, sicheres Eigenformular. Die Karten links
- * kommen aus template-parts/contact-cards.php, das Formular rechts ist der
- * serverseitig gerenderte Block „kanzlei/contact-form“.
+ * Approach 1 (custom code): lean, secure in-house form. The cards on the
+ * left come from template-parts/contact-cards.php, the form on the right
+ * is the server-rendered block "kanzlei/contact-form".
  *
- * Gegenstück: patterns/contact-booking.php (FluentBooking). Eine Variante
- * wählen, die andere löschen – siehe README.
+ * Counterpart: patterns/contact-booking.php (FluentBooking). Choose one
+ * variant, delete the other – see README.
  */
 ?>
 

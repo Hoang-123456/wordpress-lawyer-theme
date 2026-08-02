@@ -1,19 +1,18 @@
 <?php
 /**
- * FluentBooking-Absicherung – schlanke, defensive Hook-Schicht.
+ * FluentBooking safeguard – a thin, defensive hook layer.
  *
- * WICHTIG zur Einordnung: Dies ist KEIN Eigenformular, sondern nur eine dünne
- * Sicherungsschicht um das externe Plugin FluentBooking. Die eigentliche
- * DSGVO-/§203-Absicherung passiert in der Plugin-KONFIGURATION (Manual
- * Confirmation, Booking Questions, Metadaten-only-Benachrichtigung, Upload-
- * Limits) – siehe README, Abschnitt „Variante B“. Diese Datei ergänzt nur, was
- * sich sinnvoll in Code gießen lässt.
+ * IMPORTANT context: this is NOT an in-house form, only a thin safety layer
+ * around the external FluentBooking plugin. The actual DSGVO (GDPR)/§203 safeguarding
+ * happens in the plugin CONFIGURATION (Manual Confirmation, Booking Questions,
+ * metadata-only notification, upload limits) – see README, section
+ * "Variant B". This file only adds what can meaningfully be expressed in code.
  *
- * Bewusst defensiv: Ist FluentBooking nicht (mehr) installiert, passiert hier
- * nichts – ein versehentlich verbliebener Datei-Rest verursacht keinen Fehler.
+ * Deliberately defensive: if FluentBooking is not (or no longer) installed,
+ * nothing happens here – an accidentally leftover file causes no error.
  *
- * Entfernen dieses Ansatzes: diese Datei löschen, require-Zeile in functions.php
- * streichen, patterns/contact-booking.php löschen.
+ * To remove this approach: delete this file, remove the require line in
+ * functions.php, delete patterns/contact-booking.php.
  *
  * @package kanzlei-theme
  */
@@ -22,24 +21,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Kein FluentBooking aktiv → nichts tun. Deckt frei/pro und Namespace-Varianten ab.
+// No FluentBooking active → do nothing. Covers free/pro and namespace variants.
 if ( ! class_exists( '\FluentBooking\App\App' ) && ! defined( 'FLUENT_BOOKING_VERSION' ) ) {
 	return;
 }
 
 /**
- * Sicherheitsnetz für die Benachrichtigungs-E-Mail an die Kanzlei.
+ * Safety net for the notification email sent to the law firm.
  *
- * Ziel wie beim Custom-Ansatz: an Google Workspace gehen nur Metadaten, kein
- * Nachrichtentext / kein Datei-Link (§ 203 StGB). FluentBooking bietet die
- * primäre Kontrolle über seine eigenen E-Mail-Einstellungen; dieser Filter ist
- * die zweite Verteidigungslinie, falls dort versehentlich sensible Platzhalter
- * eingebaut werden.
+ * Same goal as in the custom approach: only metadata goes to Google Workspace,
+ * no message text / no file link (§ 203 StGB). FluentBooking provides the
+ * primary control via its own email settings; this filter is the second line
+ * of defense in case sensitive placeholders end up in the template by mistake.
  *
- * HINWEIS: Der genaue Filtername ist versionsabhängig und MUSS gegen die
- * installierte FluentBooking-Version geprüft werden (Plugin-Doku/Quellcode:
- * nach „apply_filters( '…email…' )“ suchen). Bis dahin ist die Plugin-
- * Konfiguration die maßgebliche Absicherung, nicht dieser Hook.
+ * NOTE: the exact filter name is version-dependent and MUST be checked
+ * against the installed FluentBooking version (plugin docs/source: search
+ * for "apply_filters( '…email…' )"). Until then, the plugin configuration
+ * is the authoritative safeguard, not this hook.
  */
 add_filter( 'kanzlei_fluent_booking_notification_body', 'kanzlei_booking_redact_sensitive', 10, 1 );
 function kanzlei_booking_redact_sensitive( $body ) {
@@ -47,7 +45,7 @@ function kanzlei_booking_redact_sensitive( $body ) {
 		return $body;
 	}
 
-	// Bekannte sensible Merge-Tags entschärfen, falls sie in der Vorlage stehen.
+	// Neutralize known sensitive merge tags if they appear in the template.
 	$sensitive_tags = apply_filters(
 		'kanzlei_booking_sensitive_tags',
 		array( '{{booking.custom.message}}', '{{booking.custom.file}}', '{{booking.custom.attachment}}' )

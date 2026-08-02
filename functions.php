@@ -10,34 +10,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Grundausstattung: Übersetzungen, Theme-Supports, Editor-Vorschau.
- * Alles Ein-Zeiler ohne Laufzeit-/Performance-Kosten – Standard-Baseline
- * für jedes WordPress-Theme.
+ * Basic setup: translations, theme supports, editor preview.
+ * All one-liners with no runtime/performance cost – standard baseline
+ * for every WordPress theme.
  */
 add_action( 'after_setup_theme', function () {
-	// Übersetzbarkeit vorbereiten (Sprachdateien in /languages).
+	// Prepare translatability (language files in /languages).
 	load_theme_textdomain( 'kanzlei-theme', get_template_directory() . '/languages' );
 
-	// Logo-Upload im Site-Editor zuverlässig aktivieren (wp:site-logo Block).
+	// Reliably enable logo upload in the Site Editor (wp:site-logo block).
 	add_theme_support( 'custom-logo' );
 
-	// Für ein mögliches späteres Blog/News-Pattern (Beiträge mit Bild).
+	// For a possible future blog/news pattern (posts with image).
 	add_theme_support( 'post-thumbnails' );
 
-	// Saubere HTML5-Auszeichnung für Formulare/Kommentare/Galerien.
+	// Clean HTML5 markup for forms/comments/galleries.
 	add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
 
-	// Eingebettete Inhalte (z. B. YouTube) responsiv statt fixer Breite.
+	// Embedded content (e.g. YouTube) responsive instead of a fixed width.
 	add_theme_support( 'responsive-embeds' );
 
-	// Editor-Vorschau nutzt dasselbe Stylesheet wie das Frontend – Redakteure
-	// sehen im Block-Editor dieselben Farben/Schriften wie live auf der Seite.
+	// Editor preview uses the same stylesheet as the frontend – editors
+	// see the same colors/fonts in the block editor as live on the site.
 	add_theme_support( 'editor-styles' );
 	add_editor_style( 'style.css' );
 } );
 
 /**
- * Pattern-Kategorie registrieren.
+ * Register pattern category.
  */
 add_action( 'init', function () {
 	register_block_pattern_category(
@@ -47,21 +47,21 @@ add_action( 'init', function () {
 } );
 
 /**
- * Kontaktbereich – zwei wählbare Ansätze, jeweils eigenständig entfernbar.
- * Nicht genutzten Ansatz löschen: Datei löschen + zugehörige require-Zeile
- * streichen (+ zugehöriges Pattern/Block-Verzeichnis). Details siehe README.
+ * Contact section – two selectable approaches, each independently removable.
+ * To remove the unused approach: delete the file + the associated require
+ * line (+ the associated pattern/block directory). See README for details.
  */
-// Ansatz 1: Custom-Code-Formular (Handler, DB, Mail, Backend, Cron, Block).
+// Approach 1: custom-code form (handler, DB, mail, backend, cron, block).
 require_once get_theme_file_path( 'inc/contact-form-custom.php' );
 
-// Ansatz 2: FluentBooking-Absicherung (defensiv, tut nichts ohne das Plugin).
+// Approach 2: FluentBooking safeguard (defensive, does nothing without the plugin).
 require_once get_theme_file_path( 'inc/contact-form-booking-hooks.php' );
 
 /**
- * Kritische Above-the-Fold-Schriften vorladen (Body-Text + Überschrift).
- * Beide werden auf jeder Seite sofort gebraucht (Header, H1); ohne Preload
- * entdeckt der Browser sie erst nach dem CSS-Parsing, was die Textdarstellung
- * (LCP) unnötig verzögert.
+ * Preload critical above-the-fold fonts (body text + heading).
+ * Both are needed immediately on every page (header, H1); without preload
+ * the browser only discovers them after CSS parsing, which unnecessarily
+ * delays text rendering (LCP).
  */
 add_action( 'wp_head', function () {
 	$uri = get_template_directory_uri();

@@ -2,7 +2,7 @@
 Theme Name:  Lawyer Landingpage Theme
 Description: Custom FSE theme for a solo law firm
 Version:     1.0.0
-Author:      Rechtsanwalt
+Author:      Lawyer
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.0
@@ -19,8 +19,8 @@ html {
   outline-offset: 3px;
 }
 
-/* Primary hat auf dunklem Grund (Header/Hero/Footer/About) zu wenig
-   Eigenkontrast zum Hintergrund – dort Accent als Fokusfarbe verwenden */
+/* Primary has too little contrast against a dark background
+   (Header/Hero/Footer/About) – use accent as the focus color there */
 .site-header :focus-visible,
 .site-footer :focus-visible,
 .has-primary-background-color :focus-visible {
@@ -447,7 +447,7 @@ html {
   background: var(--wp--preset--color--surface);
 }
 
-/* ── Contact Form (Custom-Code-Ansatz) ─────────────────────── */
+/* ── Contact Form (custom-code approach) ───────────────────── */
 
 .kanzlei-form__status {
   display: none;
@@ -527,7 +527,7 @@ html {
   color: var(--wp--preset--color--muted);
 }
 
-/* Einwilligung: Checkbox neben Text statt darüber */
+/* Consent: checkbox next to text instead of above it */
 .kanzlei-field--consent {
   flex-direction: row;
   align-items: flex-start;
@@ -545,7 +545,7 @@ html {
   color: var(--wp--preset--color--muted);
 }
 
-/* Honeypot: für Menschen unsichtbar, für Bots ein Köder */
+/* Honeypot: invisible to humans, bait for bots */
 .kanzlei-form__hp {
   position: absolute;
   left: -9999px;
@@ -554,7 +554,7 @@ html {
   overflow: hidden;
 }
 
-/* Submit-Button an die theme.json-Button-Optik angeglichen (eigenes <button>) */
+/* Submit button matched to the theme.json button look (own <button>) */
 .kanzlei-form__submit {
   font-family: var(--wp--preset--font-family--inter);
   font-size: var(--wp--preset--font-size--sm);
@@ -580,9 +580,9 @@ html {
   cursor: default;
 }
 
-/* ── Contact Cards Row (FluentBooking-Ansatz) ──────────────── */
+/* ── Contact Cards Row (FluentBooking approach) ────────────── */
 
-/* Gleiche Karten wie im Custom-Ansatz, hier aber als Reihe unter dem Kalender */
+/* Same cards as in the custom approach, but here as a row below the calendar */
 .contact-cards-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
