@@ -1,0 +1,15 @@
+# Files/folders below are dev-only tooling or internal documentation. They
+# have no effect on the running theme, but shouldn't ship to production:
+# .devcontainer/.fallow are pure editor/dev-environment config, and README.md
+# describes the security/GDPR architecture in detail – no need to expose that
+# on a publicly reachable path if a server doesn't block direct file access.
+#
+# `git archive` (used by bin/build-zip.sh) honors export-ignore and skips
+# these automatically. Plain `git clone`/`git pull` still gets everything,
+# which is intended for development.
+
+.devcontainer  export-ignore
+.fallow        export-ignore
+.gitattributes export-ignore
+.gitignore     export-ignore
+README.md      export-ignore

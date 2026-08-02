@@ -19,6 +19,36 @@ The theme ships with **two fully implemented, selectable contact
 variants** (see below). A production site uses exactly one; the other is
 deleted (see "Removing the unused variant" in the respective sections).
 
+## Deployment
+
+The repo root **is** the theme root – no build step changes that, and
+that's deliberate: it lets you `git clone` straight into
+`wp-content/themes/` or drop the folder in via SFTP as-is.
+
+`.devcontainer/`, `.fallow/`, `.gitattributes`, `.gitignore`, and
+`README.md` are dev-only tooling/documentation with no effect at runtime
+(WordPress never reads them), but there's no reason to expose them on a
+publicly reachable path either – especially README.md, which documents
+the security architecture in detail. They're marked `export-ignore` in
+`.gitattributes`, so `git archive` (and thus `bin/build-zip.sh`) leaves
+them out automatically. A plain `git clone`/`git pull` still gets
+everything, which is what you want for development.
+
+**To upload via the WordPress dashboard** (Appearance → Themes → Add New
+→ Upload Theme): commit your changes, then run
+
+```bash
+bin/build-zip.sh
+```
+
+This produces `dist/kanzlei-theme.zip` (gitignored) containing only the
+actual theme files, ready to upload. Only committed changes are included
+– uncommitted work is not.
+
+**To deploy via SFTP/rsync instead:** either upload the whole repo folder
+as-is (the excluded dev files are harmless, just unnecessary) or extract
+`bin/build-zip.sh`'s output onto the server for a leaner copy.
+
 ## Setting up the contact section
 
 The theme ships with **two selectable contact variants**. A site uses
