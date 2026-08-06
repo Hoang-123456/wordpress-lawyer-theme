@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Categories: kanzlei
  *
  * Approach 2 (FluentBooking): real calendar booking with message & file
- * upload in one step. See alternative-echtzeit-buchung-mit-upload.md for
- * details/trade-offs.
+ * upload in one step. See README.md, "Variant B", for setup and
+ * trade-offs.
  *
  * Deliberately wider layout than the custom form: the calendar needs
  * horizontal width, so it spans the full column here and the contact cards

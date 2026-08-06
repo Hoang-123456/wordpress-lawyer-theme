@@ -38,16 +38,24 @@ everything, which is what you want for development.
 → Upload Theme): commit your changes, then run
 
 ```bash
-bin/build-zip.sh
+bin/build-zip.sh                # both contact variants (base repo/testing)
+bin/build-zip.sh variant-a      # client gets the custom form only
+bin/build-zip.sh variant-b      # client gets FluentBooking only
 ```
 
-This produces `dist/kanzlei-theme.zip` (gitignored) containing only the
-actual theme files, ready to upload. Only committed changes are included
-– uncommitted work is not.
+A client site only ever needs one contact approach (see "Setting up the
+contact section" below). Passing `variant-a`/`variant-b` builds the zip
+with the other variant's files – and its `require_once` line in
+`functions.php` – already stripped out, so you don't have to repeat the
+manual "Removing variant A/B" steps by hand for every client. This
+produces `dist/kanzlei-theme[-variant].zip` (gitignored), ready to
+upload. Only committed changes are included – uncommitted work is not.
 
 **To deploy via SFTP/rsync instead:** either upload the whole repo folder
-as-is (the excluded dev files are harmless, just unnecessary) or extract
-`bin/build-zip.sh`'s output onto the server for a leaner copy.
+as-is (the excluded dev files are harmless, just unnecessary – but you'd
+still need to manually remove the unused variant, see below) or extract
+one of `bin/build-zip.sh`'s outputs onto the server for a leaner, already
+client-ready copy.
 
 ## Setting up the contact section
 
@@ -207,6 +215,10 @@ define( 'DISABLE_WP_CRON', true );
 - `kanzlei_cf_rate_limit` / `kanzlei_cf_rate_window` – rate limit per IP (default 5/hour)
 
 **Removing variant A (if B is used)**
+
+`bin/build-zip.sh variant-b` does this automatically for the deployed zip
+and leaves the working repo untouched (see "Deployment" above) – the
+steps below are for removing it permanently in the repo itself.
 1. Delete the `require_once … 'inc/contact-form-custom.php'` line in `functions.php`
 2. Delete the files: `inc/contact-form-custom.php`, `blocks/contact-form/`,
    `assets/js/contact-form.js`, `patterns/contact-form.php`
@@ -253,6 +265,10 @@ FluentBooking backend/pricing comparison before project start, as this
 changes depending on the plugin version.
 
 **Removing variant B (if A is used)**
+
+`bin/build-zip.sh variant-a` does this automatically for the deployed zip
+and leaves the working repo untouched (see "Deployment" above) – the
+steps below are for removing it permanently in the repo itself.
 1. Delete the `require_once … 'inc/contact-form-booking-hooks.php'` line in `functions.php`
 2. Delete the files: `inc/contact-form-booking-hooks.php`, `patterns/contact-booking.php`
 
@@ -261,11 +277,18 @@ changes depending on the plugin version.
 ## Note for follow-up projects
 
 Experience shows future clients only need **one** of the two approaches.
-Recommended model: maintain `kanzlei-theme` as a base theme with both
-modules, clone it per new client, and delete the unused approach as
-described above (file + pattern + `require` line), instead of building a
-separate theme from scratch for every client. How improvements to the
-base theme are later passed on to already-delivered client repos (e.g.
-Git branches per client with manual cherry-picking vs. a shared core
-package as a Composer dependency) is deliberately still open – this only
-becomes relevant once a second client actually comes along.
+Recommended model: maintain `kanzlei-theme` as a single base theme with
+both modules, and use `bin/build-zip.sh variant-a`/`variant-b` (see
+"Deployment") to produce the client-specific package – no per-client fork
+needed just for variant selection. This also means base-theme fixes reach
+every client automatically on the next build, without merging/cherry-picking
+across copies.
+
+What's still open: if a client eventually needs code-level customization
+beyond variant selection (e.g. different contact info, colors, or content
+hardcoded in patterns/template-parts rather than entered via the block
+editor), those changes can't be captured by `bin/build-zip.sh` alone.
+How that's handled (Git branches per client with manual cherry-picking vs.
+a shared core package as a Composer dependency) is deliberately still
+open – this only becomes relevant once a second client actually comes
+along.

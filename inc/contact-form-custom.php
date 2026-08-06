@@ -18,7 +18,7 @@
  * calendar entries (e.g. appointment titles with client names) from passing
  * through a third-party provider.
  *
- * Security/DSGVO (GDPR) architecture (see projekt-kontaktformular-kanzlei.md):
+ * Security/DSGVO (GDPR) architecture (see README.md, "Background"):
  * - Sensitive content (message, file) never leaves the server.
  * - The email to the law firm contains only metadata (name, appointment),
  *   no message text, no file – due to § 203 StGB / attorney confidentiality.
