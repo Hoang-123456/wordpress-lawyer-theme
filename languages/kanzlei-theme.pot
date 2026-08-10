@@ -1,0 +1,328 @@
+# Copyright (C) 2026 MrJapa
+# This file is distributed under the same license as the Brief (FSE) package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Brief (FSE) 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-10 22:54+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-08-10 22:54+0000\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Domain: kanzlei-theme\n"
+
+#: blocks/contact-form/render.php:86
+msgid " Uhr"
+msgstr ""
+
+#. translators: %d: number of matching requests.
+#: inc/contact-form-custom.php:783
+msgid "%d Treffer für alle Anfragen dieser Person – bleiben als eigenständige Datensätze bestehen."
+msgstr ""
+
+#: inc/contact-form-custom.php:724
+msgid "Abgelehnte Anfragen automatisch löschen nach (Tagen):"
+msgstr ""
+
+#: inc/contact-form-custom.php:848
+msgid "Ablehnen"
+msgstr ""
+
+#: inc/contact-form-custom.php:802
+msgid "Aktionen"
+msgstr ""
+
+#: blocks/contact-form/render.php:134
+msgid "Anfrage senden"
+msgstr ""
+
+#: inc/contact-form-custom.php:768
+msgid "Anfragen"
+msgstr ""
+
+#: inc/contact-form-custom.php:1186
+msgid "Angehängte Dateien"
+msgstr ""
+
+#: inc/contact-form-custom.php:761
+msgid "Aufheben"
+msgstr ""
+
+#: inc/contact-form-custom.php:847
+msgid "Bestätigen"
+msgstr ""
+
+#: inc/contact-form-custom.php:415
+msgid "Bitte füllen Sie alle Pflichtfelder korrekt aus."
+msgstr ""
+
+#: inc/contact-form-custom.php:405
+msgid "Bitte stimmen Sie der Datenschutzerklärung zu."
+msgstr ""
+
+#: inc/contact-form-custom.php:904 inc/contact-form-custom.php:910
+msgid "Datei nicht gefunden."
+msgstr ""
+
+#: blocks/contact-form/render.php:101
+msgid "Dateien (optional)"
+msgstr ""
+
+#: inc/contact-form-custom.php:736
+msgid "Datum & Uhrzeit"
+msgstr ""
+
+#: inc/contact-form-custom.php:601
+msgid "Der Dateityp stimmt nicht mit der Endung überein."
+msgstr ""
+
+#: blocks/contact-form/render.php:91
+msgid "Der Termin wird zunächst vorläufig reserviert und von mir bestätigt."
+msgstr ""
+
+#: inc/contact-form-custom.php:422
+msgid "Der gewählte Termin ist leider nicht mehr verfügbar. Bitte wählen Sie einen anderen."
+msgstr ""
+
+#: inc/contact-form-custom.php:586
+msgid "Die Datei ist zu groß."
+msgstr ""
+
+#: inc/contact-form-custom.php:611
+msgid "Die Datei konnte nicht gespeichert werden."
+msgstr ""
+
+#: inc/contact-form-custom.php:580
+msgid "Die Datei konnte nicht hochgeladen werden."
+msgstr ""
+
+#: inc/contact-form-custom.php:445
+msgid "Die Dateien sind in Summe zu groß."
+msgstr ""
+
+#: inc/contact-form-custom.php:852
+msgid "Diese Anfrage inklusive aller Dateien endgültig löschen?"
+msgstr ""
+
+#: blocks/contact-form/render.php:72 inc/contact-form-custom.php:799 inc/contact-form-custom.php:1174
+msgid "E-Mail"
+msgstr ""
+
+#: inc/contact-form-custom.php:796
+msgid "Eingang"
+msgstr ""
+
+#: inc/contact-form-custom.php:1178
+msgid "Eingegangen am"
+msgstr ""
+
+#: inc/contact-form-custom.php:670
+msgid "Einstellung gespeichert."
+msgstr ""
+
+#: inc/contact-form-custom.php:1179
+msgid "Einwilligung erteilt am"
+msgstr ""
+
+#: inc/contact-form-custom.php:628
+msgid "Es ist eine neue, vorläufige Terminanfrage eingegangen."
+msgstr ""
+
+#: inc/contact-form-custom.php:774
+msgid "Filtern"
+msgstr ""
+
+#: inc/contact-form-custom.php:731
+msgid "Für Termine, die nicht über das Formular kamen (Gerichtstermine, private Termine, Urlaub). Uhrzeit bitte auf das 30-Minuten-Raster runden (z. B. 14:00, 14:30) – sonst hat die Sperre keine Wirkung."
+msgstr ""
+
+#: inc/contact-form-custom.php:631
+msgid "Gewünschter Termin"
+msgstr ""
+
+#: inc/contact-form-custom.php:740
+msgid "Grund (optional)"
+msgstr ""
+
+#: inc/contact-form-custom.php:727
+msgid "IP-Adressen werden unabhängig davon nach 7 Tagen automatisch anonymisiert. Bestätigte Termine werden nie automatisch gelöscht – erst manuell, z. B. nach Übernahme ins Mandat."
+msgstr ""
+
+#. translators: %s: link to the privacy policy.
+#: blocks/contact-form/render.php:123
+msgid "Ich habe die <a href=\"%s\">Datenschutzerklärung</a> gelesen und willige in die Verarbeitung meiner Daten zur Bearbeitung meiner Anfrage ein."
+msgstr ""
+
+#: blocks/contact-form/render.php:26
+msgid "Ihre Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es erneut."
+msgstr ""
+
+#: inc/contact-form-custom.php:488
+msgid "Ihre Anfrage konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+msgstr ""
+
+#: blocks/contact-form/render.php:62
+msgid "Ihre Website (bitte frei lassen)"
+msgstr ""
+
+#: functions.php:45
+msgid "Kanzlei"
+msgstr ""
+
+#: inc/contact-form-custom.php:1152 inc/contact-form-custom.php:1193 inc/contact-form-custom.php:1208
+msgid "Kanzlei-Kontaktanfragen"
+msgstr ""
+
+#: inc/contact-form-custom.php:322
+msgid "Kanzlei-Verwaltung"
+msgstr ""
+
+#: inc/contact-form-custom.php:661 inc/contact-form-custom.php:897 inc/contact-form-custom.php:932 inc/contact-form-custom.php:991 inc/contact-form-custom.php:1007 inc/contact-form-custom.php:1023 inc/contact-form-custom.php:1055 inc/contact-form-custom.php:1086
+msgid "Keine Berechtigung."
+msgstr ""
+
+#: inc/contact-form-custom.php:945
+msgid "Keine Dateien gefunden."
+msgstr ""
+
+#: inc/contact-form-custom.php:649 inc/contact-form-custom.php:650 inc/contact-form-custom.php:720
+msgid "Kontaktanfragen"
+msgstr ""
+
+#: inc/contact-form-custom.php:853
+msgid "Löschen"
+msgstr ""
+
+#: inc/contact-form-custom.php:771
+msgid "Nach Name oder E-Mail suchen"
+msgstr ""
+
+#: inc/contact-form-custom.php:773
+msgid "Nach Name oder E-Mail suchen …"
+msgstr ""
+
+#: blocks/contact-form/render.php:96 inc/contact-form-custom.php:1177
+msgid "Nachricht"
+msgstr ""
+
+#: inc/contact-form-custom.php:800
+msgid "Nachricht / Datei"
+msgstr ""
+
+#: inc/contact-form-custom.php:814
+msgid "Nachricht anzeigen"
+msgstr ""
+
+#: inc/contact-form-custom.php:633
+msgid "Nachricht und ggf. Datei sind aus Gründen der anwaltlichen Verschwiegenheit nur im Backend unter „Kontaktanfragen“ einsehbar. Bitte dort bestätigen oder ablehnen."
+msgstr ""
+
+#: blocks/contact-form/render.php:67 inc/contact-form-custom.php:629 inc/contact-form-custom.php:798 inc/contact-form-custom.php:1173
+msgid "Name"
+msgstr ""
+
+#: inc/contact-form-custom.php:625
+msgid "Neue Terminanfrage – bitte im Dashboard bestätigen"
+msgstr ""
+
+#: inc/contact-form-custom.php:791
+msgid "Noch keine Anfragen vorhanden."
+msgstr ""
+
+#: inc/contact-form-custom.php:594
+msgid "Nur PDF-, JPG- oder PNG-Dateien sind erlaubt."
+msgstr ""
+
+#: inc/contact-form-custom.php:1187
+msgid "Original im Backend unter „Kontaktanfragen“ einsehbar."
+msgstr ""
+
+#: blocks/contact-form/render.php:108
+msgid "PDF, JPG oder PNG. Max. %1$d Dateien, je max. %2$d MB."
+msgstr ""
+
+#: inc/contact-form-custom.php:390
+msgid "Sicherheitsprüfung fehlgeschlagen. Bitte laden Sie die Seite neu."
+msgstr ""
+
+#: inc/contact-form-custom.php:433
+msgid "Sie können maximal %d Dateien anhängen."
+msgstr ""
+
+#: inc/contact-form-custom.php:726
+msgid "Speichern"
+msgstr ""
+
+#: inc/contact-form-custom.php:743
+msgid "Sperren"
+msgstr ""
+
+#: inc/contact-form-custom.php:801 inc/contact-form-custom.php:1176
+msgid "Status"
+msgstr ""
+
+#: inc/contact-form-custom.php:797 inc/contact-form-custom.php:1175
+msgid "Termin"
+msgstr ""
+
+#: inc/contact-form-custom.php:730
+msgid "Termine sperren"
+msgstr ""
+
+#: inc/contact-form-custom.php:583
+msgid "Ungültiger Upload."
+msgstr ""
+
+#: blocks/contact-form/render.php:25 inc/contact-form-custom.php:512
+msgid "Vielen Dank! Ihr Wunschtermin wurde vorläufig reserviert – ich bestätige ihn innerhalb von 24 Stunden."
+msgstr ""
+
+#: blocks/contact-form/render.php:77
+msgid "Wunschtermin"
+msgstr ""
+
+#: inc/contact-form-custom.php:953
+msgid "ZIP-Datei konnte nicht erstellt werden."
+msgstr ""
+
+#: inc/contact-form-custom.php:939
+msgid "ZIP-Download ist auf diesem Server nicht verfügbar. Bitte Dateien einzeln herunterladen."
+msgstr ""
+
+#: inc/contact-form-custom.php:400
+msgid "Zu viele Anfragen in kurzer Zeit. Bitte versuchen Sie es später erneut."
+msgstr ""
+
+#: blocks/contact-form/render.php:79
+msgid "Zurzeit sind leider keine Termine frei. Bitte kontaktieren Sie mich telefonisch."
+msgstr ""
+
+#: inc/contact-form-custom.php:777
+msgid "Zurücksetzen"
+msgstr ""
+
+#: inc/contact-form-booking-hooks.php:56
+msgid "[im Backend einsehen]"
+msgstr ""
+
+#: inc/contact-form-custom.php:716
+msgid "abgelehnt"
+msgstr ""
+
+#: inc/contact-form-custom.php:715
+msgid "bestätigt"
+msgstr ""
+
+#: inc/contact-form-custom.php:714
+msgid "vorläufig"
+msgstr ""
+
+#: blocks/contact-form/render.php:82
+msgid "– Bitte wählen –"
+msgstr ""
+
+#: inc/contact-form-custom.php:832
+msgid "↓ Alle als ZIP herunterladen"
+msgstr ""
+

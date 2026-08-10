@@ -91,6 +91,20 @@ html {
   color: var(--wp--preset--color--accent) !important;
 }
 
+.site-header .wp-block-polylang-language-switcher a {
+  color: var(--wp--preset--color--white) !important;
+  text-decoration: none;
+  font-size: var(--wp--preset--font-size--sm);
+  font-family: var(--wp--preset--font-family--inter);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.site-header .wp-block-polylang-language-switcher a:hover {
+  color: var(--wp--preset--color--accent) !important;
+}
+
 /* ── Footer ────────────────────────────────────────────────── */
 
 .site-footer {

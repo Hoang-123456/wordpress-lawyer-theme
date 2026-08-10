@@ -274,6 +274,35 @@ steps below are for removing it permanently in the repo itself.
 
 ---
 
+## Multilingual (German/English via Polylang)
+
+The theme ships Polylang-ready markup (a language-switcher block in
+`parts/header.html`, matching styles in `style.css`, and a `.pot`/English
+`.po`/`.mo` pair in `languages/`), but does **not** bundle the plugin
+itself — that's a per-site wp-admin install, not theme code. See
+`languages/README.md` for how the two translation mechanisms (page
+content vs. PHP strings) work together.
+
+Setup checklist after deploying the theme to a site:
+
+1. Install and activate [Polylang](https://wordpress.org/plugins/polylang/) (free).
+2. **Languages → Languages**: add German (default) and English; choose the
+   subdirectory URL scheme (e.g. `/en/`) for clean, SEO-friendly URLs.
+3. **Languages → Settings**: confirm template parts/navigation are
+   translatable (recent Polylang versions handle block-theme post types
+   automatically).
+4. Open the Header and Footer template parts once in the Site Editor (this
+   persists them as real posts), then use Polylang's per-part duplicate
+   action to create the English copies and translate the static text
+   ("Zum Inhalt springen" → "Skip to content", nav labels, footer legal
+   links/copyright).
+5. Confirm the language switcher renders in the header on both language
+   versions and that the contact-form labels switch to English on the
+   `/en/` version (validates `languages/kanzlei-theme-en_US.mo` is loaded
+   correctly).
+
+---
+
 ## Note for follow-up projects
 
 Experience shows future clients only need **one** of the two approaches.
