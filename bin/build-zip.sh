@@ -3,18 +3,19 @@
 # Builds a clean, upload-ready theme ZIP for WordPress's
 # "Appearance -> Themes -> Add New -> Upload Theme" dialog.
 #
-# The base repo keeps BOTH contact approaches (variant A: custom form,
-# variant B: FluentBooking) as the shared source of truth – see README
-# "Note for follow-up projects". A client only ever gets one; pass which
-# one to strip the other out of the build. Without an argument, both stay
-# in (useful for testing/archiving the base repo itself).
+# The base repo keeps all three contact approaches (variant A: custom
+# form, variant B: FluentBooking, variant C: static cards only, no form)
+# as the shared source of truth – see README "Note for follow-up
+# projects". A client only ever gets one; pass which one to strip the
+# others out of the build. Without an argument, all three stay in
+# (useful for testing/archiving the base repo itself).
 #
 # Uses `git archive`, so only committed, tracked files are included, and
 # whatever is marked `export-ignore` in .gitattributes (dev tooling,
 # internal docs) is left out automatically. Uncommitted changes are NOT
 # included – commit first.
 #
-# Usage: bin/build-zip.sh [variant-a|variant-b]
+# Usage: bin/build-zip.sh [variant-a|variant-b|variant-c]
 
 set -euo pipefail
 
@@ -22,12 +23,13 @@ THEME_SLUG="kanzlei-theme"
 VARIANT="${1:-both}"
 
 case "${VARIANT}" in
-	both|variant-a|variant-b) ;;
+	both|variant-a|variant-b|variant-c) ;;
 	*)
-		echo "Usage: $(basename "$0") [variant-a|variant-b]" >&2
-		echo "  variant-a = keep the custom form, drop FluentBooking" >&2
-		echo "  variant-b = keep FluentBooking, drop the custom form" >&2
-		echo "  (no argument) = keep both, as in the base repo" >&2
+		echo "Usage: $(basename "$0") [variant-a|variant-b|variant-c]" >&2
+		echo "  variant-a = keep the custom form, drop FluentBooking and the cards-only pattern" >&2
+		echo "  variant-b = keep FluentBooking, drop the custom form and the cards-only pattern" >&2
+		echo "  variant-c = drop both A and B, keep the static contact-info cards only" >&2
+		echo "  (no argument) = keep all three, as in the base repo" >&2
 		exit 1
 		;;
 esac
@@ -71,6 +73,12 @@ VARIANT_B_PATHS=(
 )
 VARIANT_B_REQUIRE="inc/contact-form-booking-hooks.php"
 
+# Variant C (cards only) has no PHP backend of its own – it's a pure
+# pattern file that reuses template-parts/contact-cards.php (shared,
+# never stripped). No functions.php require_once line exists for it, so
+# there's no "require marker" to remove via strip_variant()'s sed step.
+VARIANT_C_PATH="patterns/contact-cards-only.php"
+
 strip_variant() {
 	local require_marker="$1"
 	shift
@@ -86,8 +94,13 @@ strip_variant() {
 
 if [ "${VARIANT}" = "variant-a" ]; then
 	strip_variant "${VARIANT_B_REQUIRE}" "${VARIANT_B_PATHS[@]}"
+	rm -rf "${THEME_DIR:?}/${VARIANT_C_PATH}"
 elif [ "${VARIANT}" = "variant-b" ]; then
 	strip_variant "${VARIANT_A_REQUIRE}" "${VARIANT_A_PATHS[@]}"
+	rm -rf "${THEME_DIR:?}/${VARIANT_C_PATH}"
+elif [ "${VARIANT}" = "variant-c" ]; then
+	strip_variant "${VARIANT_A_REQUIRE}" "${VARIANT_A_PATHS[@]}"
+	strip_variant "${VARIANT_B_REQUIRE}" "${VARIANT_B_PATHS[@]}"
 fi
 
 (cd "${WORK_DIR}" && zip -rq "${OUT_FILE}" "${THEME_SLUG}")

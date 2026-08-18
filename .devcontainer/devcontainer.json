@@ -1,6 +1,6 @@
 {
   "name": "Lawyer WordPress Theme",
-  "image": "php:8.2-cli",
+  "image": "php:8.5-cli",
   "runArgs": ["--name", "lawyer-wordpress-theme"],
 
   

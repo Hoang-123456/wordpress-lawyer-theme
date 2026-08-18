@@ -47,9 +47,11 @@ add_action( 'init', function () {
 } );
 
 /**
- * Contact section – two selectable approaches, each independently removable.
- * To remove the unused approach: delete the file + the associated require
+ * Contact section – three selectable approaches, each independently removable.
+ * To remove an unused approach: delete the file + the associated require
  * line (+ the associated pattern/block directory). See README for details.
+ * Approach 3 (cards only, patterns/contact-cards-only.php) has no PHP
+ * backend of its own, so there's no require line for it here.
  */
 // Approach 1: custom-code form (handler, DB, mail, backend, cron, block).
 require_once get_theme_file_path( 'inc/contact-form-custom.php' );

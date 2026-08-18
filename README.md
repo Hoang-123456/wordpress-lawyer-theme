@@ -15,9 +15,9 @@ client-related content (file, message text) via third-party providers like
 Google Workspace, private file storage outside the public webroot,
 least-privilege access for the lawyer's login.
 
-The theme ships with **two fully implemented, selectable contact
-variants** (see below). A production site uses exactly one; the other is
-deleted (see "Removing the unused variant" in the respective sections).
+The theme ships with **three fully implemented, selectable contact
+variants** (see below). A production site uses exactly one; the other two
+are deleted (see "Removing the unused variant" in the respective sections).
 
 ## Deployment
 
@@ -38,18 +38,20 @@ everything, which is what you want for development.
 → Upload Theme): commit your changes, then run
 
 ```bash
-bin/build-zip.sh                # both contact variants (base repo/testing)
+bin/build-zip.sh                # all three contact variants (base repo/testing)
 bin/build-zip.sh variant-a      # client gets the custom form only
 bin/build-zip.sh variant-b      # client gets FluentBooking only
+bin/build-zip.sh variant-c      # client gets neither: static contact-info cards only
 ```
 
 A client site only ever needs one contact approach (see "Setting up the
-contact section" below). Passing `variant-a`/`variant-b` builds the zip
-with the other variant's files – and its `require_once` line in
-`functions.php` – already stripped out, so you don't have to repeat the
-manual "Removing variant A/B" steps by hand for every client. This
-produces `dist/kanzlei-theme[-variant].zip` (gitignored), ready to
-upload. Only committed changes are included – uncommitted work is not.
+contact section" below). Passing `variant-a`/`variant-b`/`variant-c`
+builds the zip with the other variants' files – and, where applicable,
+their `require_once` line in `functions.php` – already stripped out, so
+you don't have to repeat the manual "Removing variant A/B/C" steps by
+hand for every client. This produces `dist/kanzlei-theme[-variant].zip`
+(gitignored), ready to upload. Only committed changes are included –
+uncommitted work is not.
 
 **To deploy via SFTP/rsync instead:** either upload the whole repo folder
 as-is (the excluded dev files are harmless, just unnecessary – but you'd
@@ -59,19 +61,19 @@ client-ready copy.
 
 ## Setting up the contact section
 
-The theme ships with **two selectable contact variants**. A site uses
-exactly **one** – the other is deleted (see "Removing the unused
+The theme ships with **three selectable contact variants**. A site uses
+exactly **one** – the other two are deleted (see "Removing the unused
 variant").
 
-| | Variant A – Custom form | Variant B – FluentBooking |
-|---|---|---|
-| Pattern | `patterns/contact-form.php` | `patterns/contact-booking.php` |
-| Purpose | slot selection from open appointments, to be confirmed by the lawyer | real calendar booking, optionally with external calendar sync |
-| Plugin required | no (only SMTP, see below) | yes (FluentBooking) |
+| | Variant A – Custom form | Variant B – FluentBooking | Variant C – Cards only |
+|---|---|---|---|
+| Pattern | `patterns/contact-form.php` | `patterns/contact-booking.php` | `patterns/contact-cards-only.php` |
+| Purpose | slot selection from open appointments, to be confirmed by the lawyer | real calendar booking, optionally with external calendar sync | direct contact only (phone/email/address/hours), no form or booking flow |
+| Plugin required | no (only SMTP, see below) | yes (FluentBooking) | no |
 
-Both patterns appear in the editor under the **"Kanzlei"** category. The
-jump-menu link "Kontakt" (`#contact`) works for both, because both set the
-`contact` anchor.
+All three patterns appear in the editor under the **"Kanzlei"** category.
+The jump-menu link "Kontakt" (`#contact`) works for all three, since each
+sets the `contact` anchor.
 
 ---
 
@@ -117,7 +119,7 @@ the form there, otherwise a visitor could book that slot.
   DB, mail, backend, cron).
 - `assets/js/contact-form.js` – optional progressive enhancement (submit
   without reload). The form also works without JavaScript.
-- `template-parts/contact-cards.php` – shared contact cards (also used by B).
+- `template-parts/contact-cards.php` – shared contact cards (also used by B and C).
 
 **File uploads (multiple per request)**
 - Default limits: max. **3 files** per request, max. **4 MB** each, max.
@@ -214,11 +216,12 @@ define( 'DISABLE_WP_CRON', true );
 - `kanzlei_cf_allowed_types` – allowed file extensions/MIME types
 - `kanzlei_cf_rate_limit` / `kanzlei_cf_rate_window` – rate limit per IP (default 5/hour)
 
-**Removing variant A (if B is used)**
+**Removing variant A (if B or C is used)**
 
-`bin/build-zip.sh variant-b` does this automatically for the deployed zip
-and leaves the working repo untouched (see "Deployment" above) – the
-steps below are for removing it permanently in the repo itself.
+`bin/build-zip.sh variant-b`/`variant-c` does this automatically for the
+deployed zip and leaves the working repo untouched (see "Deployment"
+above) – the steps below are for removing it permanently in the repo
+itself.
 1. Delete the `require_once … 'inc/contact-form-custom.php'` line in `functions.php`
 2. Delete the files: `inc/contact-form-custom.php`, `blocks/contact-form/`,
    `assets/js/contact-form.js`, `patterns/contact-form.php`
@@ -264,25 +267,84 @@ already needed for calendar sync – check directly against the current
 FluentBooking backend/pricing comparison before project start, as this
 changes depending on the plugin version.
 
-**Removing variant B (if A is used)**
+**Removing variant B (if A or C is used)**
 
-`bin/build-zip.sh variant-a` does this automatically for the deployed zip
-and leaves the working repo untouched (see "Deployment" above) – the
-steps below are for removing it permanently in the repo itself.
+`bin/build-zip.sh variant-a`/`variant-c` does this automatically for the
+deployed zip and leaves the working repo untouched (see "Deployment"
+above) – the steps below are for removing it permanently in the repo
+itself.
 1. Delete the `require_once … 'inc/contact-form-booking-hooks.php'` line in `functions.php`
 2. Delete the files: `inc/contact-form-booking-hooks.php`, `patterns/contact-booking.php`
 
 ---
 
+### Variant C: cards only, no form (`patterns/contact-cards-only.php`)
+
+For sites where the lawyer wants visitors to reach out directly
+(phone/email) rather than through an online form or booking widget. No
+custom backend, no plugin dependency, no DB tables, no cron jobs, no
+admin screen – just the static contact info cards from
+`template-parts/contact-cards.php`, the same file used by variants A and
+B.
+
+**Setup**
+1. Insert the **"Contact – Info Cards Only"** pattern (category
+   "Kanzlei") on the desired page in the block editor.
+2. Edit the phone/email/address/office-hours values directly in
+   `template-parts/contact-cards.php`.
+
+Nothing else is required: there's no PHP backend behind this pattern (no
+`inc/*.php` file, no `require_once` line in `functions.php`), so there's
+nothing to configure, secure, or maintain beyond the static markup.
+
+**Removing variant C (if A or B is used)**
+
+`bin/build-zip.sh variant-a`/`variant-b` does this automatically for the
+deployed zip (see "Deployment" above) – to remove it permanently in the
+repo itself, delete `patterns/contact-cards-only.php`. There's no
+associated `require_once` line to remove, since this variant has no PHP
+backend.
+
+---
+
+## Multilingual (German/English via Polylang)
+
+The theme ships Polylang-ready markup (a language-switcher block in
+`parts/header.html`, matching styles in `style.css`, and a `.pot`/English
+`.po`/`.mo` pair in `languages/`), but does **not** bundle the plugin
+itself — that's a per-site wp-admin install, not theme code. See
+`languages/README.md` for how the two translation mechanisms (page
+content vs. PHP strings) work together.
+
+Setup checklist after deploying the theme to a site:
+
+1. Install and activate [Polylang](https://wordpress.org/plugins/polylang/) (free).
+2. **Languages → Languages**: add German (default) and English; choose the
+   subdirectory URL scheme (e.g. `/en/`) for clean, SEO-friendly URLs.
+3. **Languages → Settings**: confirm template parts/navigation are
+   translatable (recent Polylang versions handle block-theme post types
+   automatically).
+4. Open the Header and Footer template parts once in the Site Editor (this
+   persists them as real posts), then use Polylang's per-part duplicate
+   action to create the English copies and translate the static text
+   ("Zum Inhalt springen" → "Skip to content", nav labels, footer legal
+   links/copyright).
+5. Confirm the language switcher renders in the header on both language
+   versions and that the contact-form labels switch to English on the
+   `/en/` version (validates `languages/kanzlei-theme-en_US.mo` is loaded
+   correctly).
+
+---
+
 ## Note for follow-up projects
 
-Experience shows future clients only need **one** of the two approaches.
+Experience shows future clients only need **one** of the three approaches.
 Recommended model: maintain `kanzlei-theme` as a single base theme with
-both modules, and use `bin/build-zip.sh variant-a`/`variant-b` (see
-"Deployment") to produce the client-specific package – no per-client fork
-needed just for variant selection. This also means base-theme fixes reach
-every client automatically on the next build, without merging/cherry-picking
-across copies.
+all three modules, and use `bin/build-zip.sh variant-a`/`variant-b`/`variant-c`
+(see "Deployment") to produce the client-specific package – no per-client
+fork needed just for variant selection. This also means base-theme fixes
+reach every client automatically on the next build, without
+merging/cherry-picking across copies.
 
 What's still open: if a client eventually needs code-level customization
 beyond variant selection (e.g. different contact info, colors, or content
