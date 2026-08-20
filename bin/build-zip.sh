@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-THEME_SLUG="kanzlei-theme"
+THEME_SLUG="lawyer-theme"
 VARIANT="${1:-both}"
 
 case "${VARIANT}" in
