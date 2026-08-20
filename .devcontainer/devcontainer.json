@@ -67,5 +67,7 @@
   // Optional: lokaler PHP-Dev-Server, falls ihr direkt im Container testen wollt.
   "forwardPorts": [8080],
 
+  "postCreateCommand": "apt-get update && apt-get install -y zip unzip",
+
   "remoteUser": "root"
 }

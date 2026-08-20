@@ -1,3 +1,5 @@
+* text=auto eol=lf
+
 # Files/folders below are dev-only tooling or internal documentation. They
 # have no effect on the running theme, but shouldn't ship to production:
 # .devcontainer/.fallow are pure editor/dev-environment config, and README.md
