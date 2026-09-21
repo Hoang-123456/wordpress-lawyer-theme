@@ -3,8 +3,15 @@
   "image": "php:8.5-cli",
   "runArgs": ["--name", "lawyer-wordpress-theme"],
 
-  
   "features": {
+    // NEU: Legt den Non-Root-User "vscode" mit sudo-Rechten an
+    // und richtet zsh mit Oh My Zsh als Standard-Shell ein.
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vscode",
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
@@ -13,15 +20,16 @@
   // wird. Dadurch bleibt man eingeloggt, ohne den ganzen Container-State
   // persistent zu machen. ${devcontainerId} sorgt dafür, dass jedes Projekt
   // sein eigenes Volume bekommt, statt sich eins mit allen zu teilen.
+  // GEÄNDERT: Ziel liegt jetzt im Home von "vscode" statt unter /root.
   "mounts": [
-    "source=claude-code-config-${devcontainerId},target=/root/.claude,type=volume"
+    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
   ],
 
   "customizations": {
     "vscode": {
       "extensions": [
         // Claude-Code-Extension – bringt eine eigene, eingebettete CLI-Kopie
-        // fürs Chat-Panel mit, kein separates CLI-Feature nötig (siehe oben).
+        // fürs Chat-Panel mit, kein separates CLI-Feature nötig.
         "anthropic.claude-code",
 
         // PHP-Sprachserver: Autovervollständigung, Diagnostik, Go-to-Definition –
@@ -67,7 +75,10 @@
   // Optional: lokaler PHP-Dev-Server, falls ihr direkt im Container testen wollt.
   "forwardPorts": [8080],
 
-  "postCreateCommand": "apt-get update && apt-get install -y zip unzip",
+  // GEÄNDERT: Volume gehört beim Anlegen root, daher Besitz an "vscode" übergeben.
+  // apt-get braucht als Non-Root-User jetzt sudo.
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && sudo apt-get update && sudo apt-get install -y zip unzip",
 
-  "remoteUser": "root"
+  // GEÄNDERT: Non-Root-User statt root.
+  "remoteUser": "vscode"
 }
